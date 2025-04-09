@@ -13,12 +13,16 @@ type Account struct {
 	CurrencyCode string    `gorm:"size:3;not null"` // ex: USD, BRL
 	Name         string    `gorm:"not null"`
 	Balance      int       `gorm:"not null"`
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-	DeletedAt    gorm.DeletedAt `gorm:"index"`
+
+	Transfers      []Transfer
+	PaymentMethods []PaymentMethod
+	Debts          []Debt
+
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
-// Hook para gerar UUID automaticamente
 func (a *Account) BeforeCreate(tx *gorm.DB) (err error) {
 	a.ID = uuid.New()
 	return
