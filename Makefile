@@ -1,46 +1,49 @@
-# Nome do comando de execução
-RUN_CMD = go run $(SERVER_DIR)/main.go
+# Variáveis
+APP_NAME=finance-manager-go
+API_PORT=8080
 
-# Diretório do servidor
-SERVER_DIR = cmd/server
+# Builda a imagem da API
+build:
+	docker compose build
 
-# Nome do executável
-APP_NAME = finance-manager-go
+# Sobe os containers em modo interativo
+up:
+	docker compose up
 
-# Regra padrão para rodar o servidor
-.PHONY: run
-run:
-	$(RUN_CMD)
+# Sobe os containers em modo detached
+up-detach:
+	docker compose up -d
 
+# Para os containers
+down:
+	docker compose down
+
+# Derruba tudo e remove volume do Postgres
+reset:
+	docker compose down -v
+
+# Limpa cache e reconstroi
+rebuild:
+	docker compose build --no-cache
+
+# Testa se a API está respondendo
+health:
+	curl -i http://localhost:$(API_PORT)/health
+
+# Lista as contas cadastradas
+list-accounts:
+	curl -s http://localhost:$(API_PORT)/accounts | jq
+
+# Cria uma nova conta
+create-account:
+	curl -X POST http://localhost:$(API_PORT)/accounts \
+		-H "Content-Type: application/json" \
+		-d '{"kind":"personal","currencyCode":"BRL","name":"Conta Corrente","balance":100000}' | jq
+
+# Faz um commit
 commit:
 	@if [ -z "$(message)" ]; then \
 		echo "Erro: é necessário fornecer uma mensagem de commit."; \
 		exit 1; \
 	fi
 	@git add . && git commit -m "$(message)" && git push
-
-# Regra para limpar (não é obrigatória mas pode ser útil)
-.PHONY: clean
-clean:
-    # Aqui você pode adicionar comandos para limpar build artifacts, logs, etc.
-	@echo "Clean is not implemented yet."
-
-# Regra para instalar dependências (opcional)
-.PHONY: deps
-deps:
-	go mod tidy
-
-# Regra para testar (opcional)
-.PHONY: test
-test:
-	go test ./...
-
-# Regra para build (opcional)
-.PHONY: build
-build:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -o $(APP_NAME) $(SERVER_DIR)/main.go
-
-# Regra para rodar o build
-.PHONY: start
-start: build
-	./$(APP_NAME)
