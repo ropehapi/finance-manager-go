@@ -14,9 +14,8 @@ type Debt struct {
 	PaymentMethodID uuid.UUID `gorm:"type:uuid;not null"`
 	PaymentMethod   PaymentMethod
 
-	Amount    int  `gorm:"not null"`
-	Paid      bool `gorm:"not null;default:false"`
-	Transfers []Transfer
+	Amount int  `gorm:"not null"`
+	Paid   bool `gorm:"not null;default:false"`
 
 	CreatedAt time.Time
 	UpdatedAt time.Time

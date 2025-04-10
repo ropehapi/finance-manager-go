@@ -30,6 +30,22 @@ func NewDatabase() *gorm.DB {
 		log.Fatalf("migration failed: %v", err)
 	}
 
+	if err := db.AutoMigrate(&model.Transfer{}); err != nil {
+		log.Fatalf("migration failed: %v", err)
+	}
+
+	if err := db.AutoMigrate(&model.PaymentMethod{}); err != nil {
+		log.Fatalf("migration failed: %v", err)
+	}
+
+	if err := db.AutoMigrate(&model.Category{}); err != nil {
+		log.Fatalf("migration failed: %v", err)
+	}
+
+	if err := db.AutoMigrate(&model.Debt{}); err != nil {
+		log.Fatalf("migration failed: %v", err)
+	}
+
 	sqlDB, _ := db.DB()
 	sqlDB.SetMaxOpenConns(10)
 	sqlDB.SetMaxIdleConns(5)

@@ -11,7 +11,7 @@ type Transfer struct {
 	ID           uuid.UUID `gorm:"type:uuid;primaryKey"`
 	Type         string    `gorm:"type:varchar(20);not null"` // cashin, cashout, debt_payment
 	Currency     string    `gorm:"size:3;not null"`           // ex: BRL, USD
-	Amount       int64     `gorm:"not null"`
+	Amount       int       `gorm:"not null"`
 	Date         time.Time `gorm:"not null"`
 	Description  string    `gorm:"type:text"`
 	Observations string    `gorm:"type:text"`
@@ -24,9 +24,6 @@ type Transfer struct {
 
 	CategoryID *uuid.UUID `gorm:"type:uuid"`
 	Category   *Category  `gorm:"foreignKey:CategoryID"`
-
-	DebtID *uuid.UUID `gorm:"type:uuid"`
-	Debt   *Debt      `gorm:"foreignKey:DebtID"`
 
 	CreatedAt time.Time
 	UpdatedAt time.Time

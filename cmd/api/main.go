@@ -19,12 +19,22 @@ func main() {
 
 	database := db.NewDatabase()
 
+	// Repositórios
 	accountRepo := repository.NewAccountRepository(database)
-	accountService := service.NewAccountService(accountRepo)
-	accountHandler := handler.NewAccountHandler(accountService)
+	transferRepo := repository.NewTransferRepository(database)
 
+	// Services
+	accountService := service.NewAccountService(accountRepo)
+	transferService := service.NewTransferService(transferRepo, accountRepo)
+
+	// Handlers
+	accountHandler := handler.NewAccountHandler(accountService)
+	transferHandler := handler.NewTransferHandler(transferService)
+
+	// Router
 	r := chi.NewRouter()
 	accountHandler.RegisterRoutes(r)
+	transferHandler.RegisterRoutes(r)
 
 	port := os.Getenv("PORT")
 	if port == "" {
