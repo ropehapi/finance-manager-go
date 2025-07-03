@@ -34,22 +34,34 @@ func (s *transferService) Create(ctx context.Context, input model.Transfer) (*mo
 		return nil, errors.New("invalid currency")
 	}
 
-	// Ajusta saldo apenas em cashout com payment method válido
-	if strings.ToLower(input.Type) == "cashout" && input.PaymentMethod != nil {
-		pm := strings.ToLower(input.PaymentMethod.Type)
-		if pm == "debit" || pm == "pix" {
-			account, err := s.accountRepo.FindByID(ctx, input.AccountID.String())
-			if err != nil {
-				return nil, err
-			}
-			account.Balance -= int(input.Amount)
-			if err := s.accountRepo.Update(ctx, account); err != nil {
-				return nil, err
-			}
-		}
+	account, err := s.accountRepo.FindByID(ctx, input.AccountID.String())
+	if err != nil {
+		return nil, err
 	}
 
-	err := s.repo.Create(ctx, &input)
+	switch strings.ToLower(input.Type) {
+	case "cashin":
+		account.Balance += int(input.Amount)
+
+	case "cashout":
+		if input.PaymentMethod != nil {
+			pmType := strings.ToLower(input.PaymentMethod.Type)
+			if pmType == "debit" || pmType == "pix" {
+				account.Balance -= int(input.Amount)
+			}
+			// credit_card não altera saldo (Debt será tratado futuramente)
+		}
+
+	case "debt_payment":
+		// Em breve: lógica para quitar dívida e subtrair saldo
+	}
+
+	// Atualiza saldo da conta se houve alteração
+	if err := s.accountRepo.Update(ctx, account); err != nil {
+		return nil, err
+	}
+
+	err = s.repo.Create(ctx, &input)
 	return &input, err
 }
 
