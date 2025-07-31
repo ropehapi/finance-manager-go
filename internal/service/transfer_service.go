@@ -3,14 +3,15 @@ package service
 import (
 	"context"
 	"errors"
-	"strings"
+	"fmt"
+	"time"
 
 	"github.com/ropehapi/finance-manager-go/internal/model"
 	"github.com/ropehapi/finance-manager-go/internal/repository"
 )
 
 type TransferService interface {
-	Create(ctx context.Context, input model.Transfer) (*model.Transfer, error)
+	Cashin(ctx context.Context, input model.CreateCashinTransferInputDTO) (*model.CreateCashinTransferOutputDTO, error)
 	GetAll(ctx context.Context) ([]model.Transfer, error)
 	GetByID(ctx context.Context, id string) (*model.Transfer, error)
 	Update(ctx context.Context, id string, input model.Transfer) (*model.Transfer, error)
@@ -26,7 +27,7 @@ func NewTransferService(repo repository.TransferRepository, accountRepo reposito
 	return &transferService{repo, accountRepo}
 }
 
-func (s *transferService) Create(ctx context.Context, input model.Transfer) (*model.Transfer, error) {
+func (s *transferService) Cashin(ctx context.Context, input model.CreateCashinTransferInputDTO) (*model.CreateCashinTransferOutputDTO, error) {
 	if input.Amount <= 0 {
 		return nil, errors.New("amount must be positive")
 	}
@@ -38,31 +39,44 @@ func (s *transferService) Create(ctx context.Context, input model.Transfer) (*mo
 	if err != nil {
 		return nil, err
 	}
+	account.Balance += input.Amount
 
-	switch strings.ToLower(input.Type) {
-	case "cashin":
-		account.Balance += int(input.Amount)
-
-	case "cashout":
-		if input.PaymentMethod != nil {
-			pmType := strings.ToLower(input.PaymentMethod.Type)
-			if pmType == "debit" || pmType == "pix" {
-				account.Balance -= int(input.Amount)
-			}
-			// credit_card não altera saldo (Debt será tratado futuramente)
-		}
-
-	case "debt_payment":
-		// Em breve: lógica para quitar dívida e subtrair saldo
-	}
-
-	// Atualiza saldo da conta se houve alteração
-	if err := s.accountRepo.Update(ctx, account); err != nil {
+	if err = s.accountRepo.Update(ctx, account); err != nil {
 		return nil, err
 	}
 
-	err = s.repo.Create(ctx, &input)
-	return &input, err
+	parsedDate, err := time.Parse("2006-01-02", input.Date)
+	if err != nil {
+		return nil, fmt.Errorf("invalid date format: %v", err)
+	}
+
+	transfer := model.Transfer{
+		Type:         "cashin",
+		Currency:     input.Currency,
+		Amount:       input.Amount,
+		Description:  input.Description,
+		Date:         parsedDate,
+		CategoryID:   input.CategoryID,
+		AccountID:    input.AccountID,
+		Observations: input.Observations,
+	}
+
+	err = s.repo.Create(ctx, &transfer)
+	if err != nil {
+		return nil, err
+	}
+
+	output := model.CreateCashinTransferOutputDTO{
+		ID:           transfer.ID,
+		Currency:     transfer.Currency,
+		Amount:       transfer.Amount,
+		Description:  transfer.Description,
+		Date:         transfer.Date.String(),
+		CategoryID:   transfer.CategoryID,
+		AccountID:    transfer.AccountID,
+		Observations: transfer.Observations,
+	}
+	return &output, err
 }
 
 func (s *transferService) GetAll(ctx context.Context) ([]model.Transfer, error) {

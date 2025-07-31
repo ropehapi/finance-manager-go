@@ -16,8 +16,8 @@ type Transfer struct {
 	Description  string    `gorm:"type:text"`
 	Observations string    `gorm:"type:text"`
 
-	AccountID uuid.UUID `gorm:"type:uuid;not null"`
-	Account   Account   `gorm:"foreignKey:AccountID"`
+	AccountID *uuid.UUID `gorm:"type:uuid;not null"`
+	Account   *Account   `gorm:"foreignKey:AccountID"`
 
 	PaymentMethodID *uuid.UUID     `gorm:"type:uuid"`
 	PaymentMethod   *PaymentMethod `gorm:"foreignKey:PaymentMethodID"`
@@ -28,6 +28,27 @@ type Transfer struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
+}
+
+type CreateCashinTransferInputDTO struct {
+	Currency     string     `json:"currency" binding:"required"`
+	Amount       int        `json:"amount" binding:"required"`
+	Description  string     `json:"description" binding:"required"`
+	Date         string     `json:"date" binding:"required"`
+	CategoryID   *uuid.UUID `json:"category_id"`
+	AccountID    *uuid.UUID `json:"account_id" binding:"required"`
+	Observations string     `json:"observations"`
+}
+
+type CreateCashinTransferOutputDTO struct {
+	ID           uuid.UUID  `json:"id"`
+	Currency     string     `json:"currency"`
+	Amount       int        `json:"amount"`
+	Description  string     `json:"description"`
+	Date         string     `json:"date"`
+	CategoryID   *uuid.UUID `json:"category_id"`
+	AccountID    *uuid.UUID `json:"account_id" binding:"required"`
+	Observations string     `json:"observations"`
 }
 
 func (t *Transfer) BeforeCreate(tx *gorm.DB) (err error) {

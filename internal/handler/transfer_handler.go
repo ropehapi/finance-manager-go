@@ -1,10 +1,9 @@
 package handler
 
 import (
-	"encoding/json"
+	"github.com/gin-gonic/gin"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/ropehapi/finance-manager-go/internal/model"
 	"github.com/ropehapi/finance-manager-go/internal/service"
@@ -18,68 +17,78 @@ func NewTransferHandler(svc service.TransferService) *TransferHandler {
 	return &TransferHandler{svc}
 }
 
-func (h *TransferHandler) RegisterRoutes(r chi.Router) {
-	r.Route("/transfers", func(r chi.Router) {
-		r.Post("/", h.Create)
-		r.Get("/", h.GetAll)
-		r.Get("/{id}", h.GetByID)
-		r.Delete("/{id}", h.Delete)
-	})
+func (h *TransferHandler) Cashin(c *gin.Context) {
+	var input model.CreateCashinTransferInputDTO
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	output, err := h.svc.Cashin(c.Request.Context(), input)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, output)
 }
 
-func (h *TransferHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var input model.Transfer
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, "invalid request", http.StatusBadRequest)
-		return
-	}
+//func (h *TransferHandler) Cashout(c *gin.Context) {
+//	var input model.Transfer
+//
+//	if err := c.ShouldBindJSON(&input); err != nil {
+//		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+//		return
+//	}
+//
+//	transfer, err := h.svc.Create(c.Request.Context(), input)
+//	if err != nil {
+//		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+//		return
+//	}
+//
+//	c.JSON(http.StatusCreated, transfer)
+//}
 
-	transfer, err := h.svc.Create(r.Context(), input)
+func (h *TransferHandler) GetAll(c *gin.Context) {
+	transfers, err := h.svc.GetAll(c.Request.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
-
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(transfer)
+	c.JSON(http.StatusOK, transfers)
 }
 
-func (h *TransferHandler) GetAll(w http.ResponseWriter, r *http.Request) {
-	transfers, err := h.svc.GetAll(r.Context())
-	if err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+func (h *TransferHandler) GetByID(c *gin.Context) {
+	idParam := c.Param("id")
+
+	if _, err := uuid.Parse(idParam); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
-	json.NewEncoder(w).Encode(transfers)
+
+	transfer, err := h.svc.GetByID(c.Request.Context(), idParam)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, transfer)
 }
 
-func (h *TransferHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	idParam := chi.URLParam(r, "id")
-	_, err := uuid.Parse(idParam)
-	if err != nil {
-		http.Error(w, "invalid id", http.StatusBadRequest)
+func (h *TransferHandler) Delete(c *gin.Context) {
+	idParam := c.Param("id")
+
+	if _, err := uuid.Parse(idParam); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
-	transfer, err := h.svc.GetByID(r.Context(), idParam)
-	if err != nil {
-		http.Error(w, "not found", http.StatusNotFound)
-		return
-	}
-	json.NewEncoder(w).Encode(transfer)
-}
-
-func (h *TransferHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	idParam := chi.URLParam(r, "id")
-	_, err := uuid.Parse(idParam)
-	if err != nil {
-		http.Error(w, "invalid id", http.StatusBadRequest)
+	if err := h.svc.Delete(c.Request.Context(), idParam); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 		return
 	}
 
-	if err := h.svc.Delete(r.Context(), idParam); err != nil {
-		http.Error(w, "not found", http.StatusNotFound)
-		return
-	}
-	w.WriteHeader(http.StatusNoContent)
+	c.Status(http.StatusNoContent)
 }

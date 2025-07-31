@@ -20,15 +20,15 @@ func main() {
 	database := db.NewDatabase()
 
 	accountRepo := repository.NewAccountRepository(database)
-	//transferRepo := repository.NewTransferRepository(database)
+	transferRepo := repository.NewTransferRepository(database)
 	//paymentMethodRepo := repository.NewPaymentMethodRepository(database)
 
 	accountService := service.NewAccountService(accountRepo)
-	//transferService := service.NewTransferService(transferRepo, accountRepo)
+	transferService := service.NewTransferService(transferRepo, accountRepo)
 	//paymentMethodService := service.NewPaymentMethodService(paymentMethodRepo)
 
 	accountHandler := handler.NewAccountHandler(accountService)
-	//transferHandler := handler.NewTransferHandler(transferService)
+	transferHandler := handler.NewTransferHandler(transferService)
 	//paymentMethodHandler := handler.NewPaymentMethodHandler(paymentMethodService)
 
 	r := gin.Default()
@@ -39,7 +39,12 @@ func main() {
 	account.PUT("/:id", accountHandler.Update)
 	account.DELETE("/:id", accountHandler.Delete)
 
-	//transferHandler.RegisterRoutes(r)
+	transfer := r.Group("/transfers")
+	transfer.POST("/cashin", transferHandler.Cashin)
+	//transfer.POST("/cashout", transferHandler.Cashout)
+	transfer.GET("/", transferHandler.GetAll)
+	transfer.GET("/:id", transferHandler.GetByID)
+	transfer.DELETE("/:id", transferHandler.Delete)
 	//paymentMethodHandler.RegisterRoutes(r)
 
 	port := os.Getenv("PORT")
