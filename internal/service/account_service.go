@@ -3,16 +3,15 @@ package service
 import (
 	"context"
 	"errors"
-
 	"github.com/ropehapi/finance-manager-go/internal/model"
 	"github.com/ropehapi/finance-manager-go/internal/repository"
 )
 
 type AccountService interface {
-	Create(ctx context.Context, input model.Account) (*model.Account, error)
-	GetAll(ctx context.Context) ([]model.Account, error)
-	GetByID(ctx context.Context, id string) (*model.Account, error)
-	Update(ctx context.Context, id string, input model.Account) (*model.Account, error)
+	Create(ctx context.Context, input model.CreateAccountInputDTO) (*model.CreateAccountOutputDTO, error)
+	GetAll(ctx context.Context) ([]model.CreateAccountOutputDTO, error)
+	GetByID(ctx context.Context, id string) (*model.CreateAccountOutputDTO, error)
+	Update(ctx context.Context, id string, input model.CreateAccountInputDTO) (*model.CreateAccountOutputDTO, error)
 	Delete(ctx context.Context, id string) error
 }
 
@@ -24,7 +23,7 @@ func NewAccountService(repo repository.AccountRepository) AccountService {
 	return &accountService{repo}
 }
 
-func (s *accountService) Create(ctx context.Context, input model.Account) (*model.Account, error) {
+func (s *accountService) Create(ctx context.Context, input model.CreateAccountInputDTO) (*model.CreateAccountOutputDTO, error) {
 	if input.Balance < 0 {
 		return nil, errors.New("balance must not be negative")
 	}
@@ -32,30 +31,84 @@ func (s *accountService) Create(ctx context.Context, input model.Account) (*mode
 		return nil, errors.New("invalid currency code")
 	}
 
-	err := s.repo.Create(ctx, &input)
-	return &input, err
+	account := &model.Account{
+		Balance:      input.Balance,
+		CurrencyCode: input.CurrencyCode,
+		Name:         input.Name,
+	}
+
+	err := s.repo.Create(ctx, account)
+	if err != nil {
+		return nil, err
+	}
+
+	output := &model.CreateAccountOutputDTO{
+		Id:           account.ID,
+		Balance:      account.Balance,
+		CurrencyCode: account.CurrencyCode,
+		Name:         account.Name,
+	}
+
+	return output, nil
 }
 
-func (s *accountService) GetAll(ctx context.Context) ([]model.Account, error) {
-	return s.repo.FindAll(ctx)
+func (s *accountService) GetAll(ctx context.Context) ([]model.CreateAccountOutputDTO, error) {
+	accounts, err := s.repo.FindAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	output := make([]model.CreateAccountOutputDTO, len(accounts))
+	for i := range accounts {
+		output[i] = model.CreateAccountOutputDTO{
+			Id:           accounts[i].ID,
+			Balance:      accounts[i].Balance,
+			CurrencyCode: accounts[i].CurrencyCode,
+			Name:         accounts[i].Name,
+		}
+	}
+
+	return output, nil
 }
 
-func (s *accountService) GetByID(ctx context.Context, id string) (*model.Account, error) {
-	return s.repo.FindByID(ctx, id)
-}
-
-func (s *accountService) Update(ctx context.Context, id string, input model.Account) (*model.Account, error) {
+func (s *accountService) GetByID(ctx context.Context, id string) (*model.CreateAccountOutputDTO, error) {
 	account, err := s.repo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
+
+	output := &model.CreateAccountOutputDTO{
+		Id:           account.ID,
+		Balance:      account.Balance,
+		CurrencyCode: account.CurrencyCode,
+		Name:         account.Name,
+	}
+	return output, nil
+}
+
+func (s *accountService) Update(ctx context.Context, id string, input model.CreateAccountInputDTO) (*model.CreateAccountOutputDTO, error) {
+	account, err := s.repo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
 	account.Name = input.Name
-	account.Kind = input.Kind
 	account.CurrencyCode = input.CurrencyCode
 	account.Balance = input.Balance
 
 	err = s.repo.Update(ctx, account)
-	return account, err
+	if err != nil {
+		return nil, err
+	}
+
+	output := &model.CreateAccountOutputDTO{
+		Id:           account.ID,
+		Balance:      account.Balance,
+		CurrencyCode: account.CurrencyCode,
+		Name:         account.Name,
+	}
+
+	return output, err
 }
 
 func (s *accountService) Delete(ctx context.Context, id string) error {

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
 	"github.com/ropehapi/finance-manager-go/internal/handler"
@@ -15,35 +15,39 @@ import (
 )
 
 func main() {
-	_ = godotenv.Load() // carrega variáveis de ambiente do .env
+	_ = godotenv.Load()
 
 	database := db.NewDatabase()
 
-	// Repositórios
 	accountRepo := repository.NewAccountRepository(database)
-	transferRepo := repository.NewTransferRepository(database)
-	paymentMethodRepo := repository.NewPaymentMethodRepository(database)
+	//transferRepo := repository.NewTransferRepository(database)
+	//paymentMethodRepo := repository.NewPaymentMethodRepository(database)
 
-	// Services
 	accountService := service.NewAccountService(accountRepo)
-	transferService := service.NewTransferService(transferRepo, accountRepo)
-	paymentMethodService := service.NewPaymentMethodService(paymentMethodRepo)
+	//transferService := service.NewTransferService(transferRepo, accountRepo)
+	//paymentMethodService := service.NewPaymentMethodService(paymentMethodRepo)
 
-	// Handlers
 	accountHandler := handler.NewAccountHandler(accountService)
-	transferHandler := handler.NewTransferHandler(transferService)
-	paymentMethodHandler := handler.NewPaymentMethodHandler(paymentMethodService)
+	//transferHandler := handler.NewTransferHandler(transferService)
+	//paymentMethodHandler := handler.NewPaymentMethodHandler(paymentMethodService)
 
-	// Router
-	r := chi.NewRouter()
-	accountHandler.RegisterRoutes(r)
-	transferHandler.RegisterRoutes(r)
-	paymentMethodHandler.RegisterRoutes(r)
+	r := gin.Default()
+	account := r.Group("/accounts")
+	account.POST("/", accountHandler.Create)
+	account.GET("/", accountHandler.GetAll)
+	account.GET("/:id", accountHandler.GetByID)
+	account.PUT("/:id", accountHandler.Update)
+	account.DELETE("/:id", accountHandler.Delete)
+
+	//transferHandler.RegisterRoutes(r)
+	//paymentMethodHandler.RegisterRoutes(r)
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
+
+	r.Run(":" + port)
 
 	log.Printf("Servidor rodando na porta %s", port)
 	log.Fatal(http.ListenAndServe(":"+port, r))

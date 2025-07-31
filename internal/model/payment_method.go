@@ -12,9 +12,6 @@ type PaymentMethod struct {
 	Name string    `gorm:"not null"`
 	Type string    `gorm:"not null"` // ex: credit_card, debit_card, pix
 
-	AccountID uuid.UUID `gorm:"type:uuid;not null"`
-	Account   Account   `gorm:"foreignKey:AccountID"`
-
 	Transfers []Transfer
 	Debts     []Debt
 
