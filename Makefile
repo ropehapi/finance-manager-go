@@ -41,9 +41,9 @@ create-account:
 		-d '{"kind":"personal","currencyCode":"BRL","name":"Conta Corrente","balance":100000}' | jq
 
 # Faz um commit
-commit:
-	@if [ -z "$(message)" ]; then \
+gcm:
+	@if [ -z "$(m)" ]; then \
 		echo "Erro: é necessário fornecer uma mensagem de commit."; \
 		exit 1; \
 	fi
-	@git add . && git commit -m "$(message)" && git push
+	@git add . && git commit -m "$(m)" && git push
