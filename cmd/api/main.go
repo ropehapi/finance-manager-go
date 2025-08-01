@@ -15,16 +15,17 @@ import (
 )
 
 func main() {
+	//TODO: Adicionar transactions nas operações
 	_ = godotenv.Load()
 
 	database := db.NewDatabase()
 
 	accountRepo := repository.NewAccountRepository(database)
 	transferRepo := repository.NewTransferRepository(database)
-	//paymentMethodRepo := repository.NewPaymentMethodRepository(database)
+	paymentMethodRepo := repository.NewPaymentMethodRepository(database)
 
 	accountService := service.NewAccountService(accountRepo)
-	transferService := service.NewTransferService(transferRepo, accountRepo)
+	transferService := service.NewTransferService(transferRepo, accountRepo, paymentMethodRepo)
 	//paymentMethodService := service.NewPaymentMethodService(paymentMethodRepo)
 
 	accountHandler := handler.NewAccountHandler(accountService)
@@ -41,7 +42,7 @@ func main() {
 
 	transfer := r.Group("/transfers")
 	transfer.POST("/cashin", transferHandler.Cashin)
-	//transfer.POST("/cashout", transferHandler.Cashout)
+	transfer.POST("/cashout", transferHandler.Cashout)
 	transfer.GET("/", transferHandler.GetAll)
 	transfer.GET("/:id", transferHandler.GetByID)
 	transfer.DELETE("/:id", transferHandler.Delete)

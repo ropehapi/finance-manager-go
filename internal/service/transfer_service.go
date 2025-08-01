@@ -12,6 +12,7 @@ import (
 
 type TransferService interface {
 	Cashin(ctx context.Context, input model.CreateCashinTransferInputDTO) (*model.CreateCashinTransferOutputDTO, error)
+	Cashout(ctx context.Context, input model.CreateCashoutTransferInputDTO) (*model.CreateCashoutTransferOutputDTO, error)
 	GetAll(ctx context.Context) ([]model.Transfer, error)
 	GetByID(ctx context.Context, id string) (*model.Transfer, error)
 	Update(ctx context.Context, id string, input model.Transfer) (*model.Transfer, error)
@@ -19,12 +20,13 @@ type TransferService interface {
 }
 
 type transferService struct {
-	repo        repository.TransferRepository
-	accountRepo repository.AccountRepository
+	repo              repository.TransferRepository
+	accountRepo       repository.AccountRepository
+	paymentMethodRepo repository.PaymentMethodRepository
 }
 
-func NewTransferService(repo repository.TransferRepository, accountRepo repository.AccountRepository) TransferService {
-	return &transferService{repo, accountRepo}
+func NewTransferService(repo repository.TransferRepository, accountRepo repository.AccountRepository, paymentMethodRepo repository.PaymentMethodRepository) TransferService {
+	return &transferService{repo, accountRepo, paymentMethodRepo}
 }
 
 func (s *transferService) Cashin(ctx context.Context, input model.CreateCashinTransferInputDTO) (*model.CreateCashinTransferOutputDTO, error) {
@@ -75,6 +77,72 @@ func (s *transferService) Cashin(ctx context.Context, input model.CreateCashinTr
 		CategoryID:   transfer.CategoryID,
 		AccountID:    transfer.AccountID,
 		Observations: transfer.Observations,
+	}
+	return &output, err
+}
+
+func (s *transferService) Cashout(ctx context.Context, input model.CreateCashoutTransferInputDTO) (*model.CreateCashoutTransferOutputDTO, error) {
+	if input.Amount <= 0 {
+		return nil, errors.New("amount must be positive")
+	}
+	if input.Currency == "" || len(input.Currency) != 3 { //TODO: Adicionar tratamento para BRL default
+		return nil, errors.New("invalid currency")
+	}
+
+	paymentMethod, err := s.paymentMethodRepo.FindByID(ctx, input.PaymentMethodID.String())
+	if err != nil {
+		return nil, err
+	}
+
+	if paymentMethod.Type == "debit" {
+		account, err := s.accountRepo.FindByID(ctx, input.AccountID.String())
+		if err != nil {
+			return nil, err
+		}
+		account.Balance -= input.Amount
+		if account.Balance < 0 {
+			return nil, errors.New("insuficient funds")
+		}
+
+		if err = s.accountRepo.Update(ctx, account); err != nil {
+			return nil, err
+		}
+	} else if paymentMethod.Type == "credit" {
+		//TODO: Implementar incremento de conta a pagar
+	}
+
+	parsedDate, err := time.Parse("2006-01-02", input.Date)
+	if err != nil {
+		return nil, fmt.Errorf("invalid date format: %v", err)
+	}
+
+	transfer := model.Transfer{
+		Type:            "cashout",
+		Currency:        input.Currency,
+		Amount:          input.Amount,
+		Description:     input.Description,
+		Date:            parsedDate,
+		CategoryID:      input.CategoryID,
+		PaymentMethodID: input.PaymentMethodID,
+		AccountID:       input.AccountID,
+		Observations:    input.Observations, //TODO: Validar timestamps
+	}
+
+	err = s.repo.Create(ctx, &transfer)
+	if err != nil {
+		return nil, err
+	}
+
+	output := model.CreateCashoutTransferOutputDTO{
+		ID:              transfer.ID,
+		Currency:        transfer.Currency,
+		Amount:          transfer.Amount,
+		Description:     transfer.Description,
+		Date:            transfer.Date.String(),
+		CategoryID:      transfer.CategoryID,
+		PaymentMethodID: transfer.PaymentMethodID,
+		AccountID:       transfer.AccountID,
+		Observations:    transfer.Observations,
 	}
 	return &output, err
 }

@@ -34,22 +34,22 @@ func (h *TransferHandler) Cashin(c *gin.Context) {
 	c.JSON(http.StatusCreated, output)
 }
 
-//func (h *TransferHandler) Cashout(c *gin.Context) {
-//	var input model.Transfer
-//
-//	if err := c.ShouldBindJSON(&input); err != nil {
-//		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
-//		return
-//	}
-//
-//	transfer, err := h.svc.Create(c.Request.Context(), input)
-//	if err != nil {
-//		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-//		return
-//	}
-//
-//	c.JSON(http.StatusCreated, transfer)
-//}
+func (h *TransferHandler) Cashout(c *gin.Context) {
+	var input model.CreateCashoutTransferInputDTO
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	output, err := h.svc.Cashout(c.Request.Context(), input)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, output)
+}
 
 func (h *TransferHandler) GetAll(c *gin.Context) {
 	transfers, err := h.svc.GetAll(c.Request.Context())
