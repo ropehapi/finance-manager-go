@@ -51,13 +51,13 @@ func (h *TransferHandler) Cashout(c *gin.Context) {
 	c.JSON(http.StatusCreated, output)
 }
 
-func (h *TransferHandler) GetAll(c *gin.Context) {
-	transfers, err := h.svc.GetAll(c.Request.Context())
+func (h *TransferHandler) GetAll(c *gin.Context) { //TODO: Adicionar filtros
+	output, err := h.svc.GetAll(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
-	c.JSON(http.StatusOK, transfers)
+	c.JSON(http.StatusOK, output)
 }
 
 func (h *TransferHandler) GetByID(c *gin.Context) {
@@ -68,13 +68,13 @@ func (h *TransferHandler) GetByID(c *gin.Context) {
 		return
 	}
 
-	transfer, err := h.svc.GetByID(c.Request.Context(), idParam)
+	output, err := h.svc.GetByID(c.Request.Context(), idParam)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 		return
 	}
 
-	c.JSON(http.StatusOK, transfer)
+	c.JSON(http.StatusOK, output)
 }
 
 func (h *TransferHandler) Delete(c *gin.Context) {

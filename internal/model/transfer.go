@@ -75,6 +75,21 @@ type CreateCashoutTransferOutputDTO struct {
 	Observations    string     `json:"observations"`
 }
 
+type TransferOutputDTO struct {
+	ID              uuid.UUID  `json:"id"`
+	Currency        string     `json:"currency"`
+	Amount          int        `json:"amount"`
+	Description     string     `json:"description"`
+	Date            string     `json:"date"`
+	CategoryID      *uuid.UUID `json:"category_id"`
+	PaymentMethodID *uuid.UUID `json:"payment_method_id"`
+	AccountID       *uuid.UUID `json:"account_id"`
+	Observations    string     `json:"observations"`
+	CreatedAt       time.Time  `json:"created_at"`
+	UpdatedAt       time.Time  `json:"updated_at"`
+	DeletedAt       time.Time  `json:"deleted_at"`
+}
+
 func (t *Transfer) BeforeCreate(tx *gorm.DB) (err error) {
 	t.ID = uuid.New()
 	return

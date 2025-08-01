@@ -16,6 +16,7 @@ import (
 
 func main() {
 	//TODO: Adicionar transactions nas operações
+	//TODO: Adicionar filtragem e paginação nas consultas GET
 	_ = godotenv.Load()
 
 	database := db.NewDatabase()

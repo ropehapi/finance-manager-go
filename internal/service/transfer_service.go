@@ -13,8 +13,8 @@ import (
 type TransferService interface {
 	Cashin(ctx context.Context, input model.CreateCashinTransferInputDTO) (*model.CreateCashinTransferOutputDTO, error)
 	Cashout(ctx context.Context, input model.CreateCashoutTransferInputDTO) (*model.CreateCashoutTransferOutputDTO, error)
-	GetAll(ctx context.Context) ([]model.Transfer, error)
-	GetByID(ctx context.Context, id string) (*model.Transfer, error)
+	GetAll(ctx context.Context) ([]model.TransferOutputDTO, error)
+	GetByID(ctx context.Context, id string) (*model.TransferOutputDTO, error)
 	Update(ctx context.Context, id string, input model.Transfer) (*model.Transfer, error)
 	Delete(ctx context.Context, id string) error
 }
@@ -147,14 +147,52 @@ func (s *transferService) Cashout(ctx context.Context, input model.CreateCashout
 	return &output, err
 }
 
-func (s *transferService) GetAll(ctx context.Context) ([]model.Transfer, error) {
-	return s.repo.FindAll(ctx)
+func (s *transferService) GetAll(ctx context.Context) ([]model.TransferOutputDTO, error) {
+	transactions, err := s.repo.FindAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	output := make([]model.TransferOutputDTO, len(transactions))
+	for i, transaction := range transactions {
+		output[i] = model.TransferOutputDTO{
+			ID:           transaction.ID,
+			Currency:     transaction.Currency,
+			Amount:       transaction.Amount,
+			Description:  transaction.Description,
+			Date:         transaction.Date.String(),
+			CategoryID:   transaction.CategoryID, //TODO: Devolver nomes envés de ids
+			AccountID:    transaction.AccountID,
+			Observations: transaction.Observations,
+			CreatedAt:    transaction.CreatedAt,
+			UpdatedAt:    transaction.UpdatedAt,
+		}
+	}
+	return output, nil
 }
 
-func (s *transferService) GetByID(ctx context.Context, id string) (*model.Transfer, error) {
-	return s.repo.FindByID(ctx, id)
+func (s *transferService) GetByID(ctx context.Context, id string) (*model.TransferOutputDTO, error) {
+	transfer, err := s.repo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.TransferOutputDTO{
+		ID:              transfer.ID,
+		Currency:        transfer.Currency,
+		Amount:          transfer.Amount,
+		Description:     transfer.Description,
+		Date:            transfer.Date.String(),
+		CategoryID:      transfer.CategoryID,
+		PaymentMethodID: transfer.PaymentMethodID,
+		AccountID:       transfer.AccountID,
+		Observations:    transfer.Observations,
+		CreatedAt:       transfer.CreatedAt,
+		UpdatedAt:       transfer.UpdatedAt,
+	}, nil
 }
 
+// TODO: Parei aqui, necessário mesmo fazer update? Não seria melhor excluir e criar outro?
 func (s *transferService) Update(ctx context.Context, id string, input model.Transfer) (*model.Transfer, error) {
 	transfer, err := s.repo.FindByID(ctx, id)
 	if err != nil {
