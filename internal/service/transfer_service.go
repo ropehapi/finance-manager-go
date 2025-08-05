@@ -15,7 +15,6 @@ type TransferService interface {
 	Cashout(ctx context.Context, input model.CreateCashoutTransferInputDTO) (*model.CreateCashoutTransferOutputDTO, error)
 	GetAll(ctx context.Context) ([]model.TransferOutputDTO, error)
 	GetByID(ctx context.Context, id string) (*model.TransferOutputDTO, error)
-	Update(ctx context.Context, id string, input model.Transfer) (*model.Transfer, error)
 	Delete(ctx context.Context, id string) error
 }
 
@@ -192,29 +191,34 @@ func (s *transferService) GetByID(ctx context.Context, id string) (*model.Transf
 	}, nil
 }
 
-// TODO: Parei aqui, necessário mesmo fazer update? Não seria melhor excluir e criar outro?
-func (s *transferService) Update(ctx context.Context, id string, input model.Transfer) (*model.Transfer, error) {
+func (s *transferService) Delete(ctx context.Context, id string) error {
 	transfer, err := s.repo.FindByID(ctx, id)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	transfer.Type = input.Type
-	transfer.Currency = input.Currency
-	transfer.Amount = input.Amount
-	transfer.Date = input.Date
-	transfer.Description = input.Description
-	transfer.Observations = input.Observations
-	transfer.AccountID = input.AccountID
-	transfer.PaymentMethodID = input.PaymentMethodID
-	transfer.CategoryID = input.CategoryID
-
-	if err := s.repo.Update(ctx, transfer); err != nil {
-		return nil, err
+	account, err := s.accountRepo.FindByID(ctx, transfer.AccountID.String())
+	if err != nil {
+		return err
 	}
-	return transfer, nil
-}
 
-func (s *transferService) Delete(ctx context.Context, id string) error {
+	if transfer.Type == "cashin" {
+		account.Balance -= transfer.Amount
+	} else if transfer.Type == "cashout" {
+		paymentMethod, err := s.paymentMethodRepo.FindByID(ctx, transfer.PaymentMethodID.String())
+		if err != nil {
+			return err
+		}
+
+		if paymentMethod.Type == "debit" {
+			account.Balance += transfer.Amount
+		} else if paymentMethod.Type == "credit" {
+			//TODO: Implementar decremento de conta a pagar
+		}
+	}
+
+	if err = s.accountRepo.Update(ctx, account); err != nil {
+		return err
+	}
 	return s.repo.Delete(ctx, id)
 }
