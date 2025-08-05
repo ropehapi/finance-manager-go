@@ -59,7 +59,6 @@ type CreateCashoutTransferInputDTO struct {
 	Date            string     `json:"date" binding:"required"`
 	CategoryID      *uuid.UUID `json:"category_id"`       //TODO: Tornar obrigatório quando implementar
 	PaymentMethodID *uuid.UUID `json:"payment_method_id"` //TODO: Tornar obrigatório quando implementar
-	AccountID       *uuid.UUID `json:"account_id"`        //TODO: Tornar obrigatório quando implementar
 	Observations    string     `json:"observations"`
 }
 

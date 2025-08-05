@@ -1,10 +1,9 @@
 package handler
 
 import (
-	"encoding/json"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/gin-gonic/gin"
 	"github.com/ropehapi/finance-manager-go/internal/model"
 	"github.com/ropehapi/finance-manager-go/internal/service"
 )
@@ -17,65 +16,70 @@ func NewPaymentMethodHandler(svc service.PaymentMethodService) *PaymentMethodHan
 	return &PaymentMethodHandler{svc}
 }
 
-func (h *PaymentMethodHandler) RegisterRoutes(r chi.Router) {
-	r.Route("/payment-methods", func(r chi.Router) {
-		r.Post("/", h.Create)
-		r.Get("/", h.GetAll)
-		r.Get("/{id}", h.GetByID)
-		r.Put("/{id}", h.Update)
-		r.Delete("/{id}", h.Delete)
-	})
-}
+func (h *PaymentMethodHandler) Create(c *gin.Context) {
+	var input model.CreatePaymentMethodInputDTO
 
-func (h *PaymentMethodHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var input model.PaymentMethod
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, "invalid request", http.StatusBadRequest)
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
 		return
 	}
-	method, err := h.svc.Create(r.Context(), input)
+
+	output, err := h.svc.Create(c.Request.Context(), input)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	json.NewEncoder(w).Encode(method)
+
+	c.JSON(http.StatusCreated, output)
 }
 
-func (h *PaymentMethodHandler) GetAll(w http.ResponseWriter, r *http.Request) {
-	methods, _ := h.svc.GetAll(r.Context())
-	json.NewEncoder(w).Encode(methods)
-}
-
-func (h *PaymentMethodHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	method, err := h.svc.GetByID(r.Context(), id)
+func (h *PaymentMethodHandler) GetAll(c *gin.Context) {
+	output, err := h.svc.GetAll(c.Request.Context())
 	if err != nil {
-		http.Error(w, "not found", http.StatusNotFound)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
-	json.NewEncoder(w).Encode(method)
+
+	c.JSON(http.StatusOK, output)
 }
 
-func (h *PaymentMethodHandler) Update(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	var input model.PaymentMethod
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, "invalid request", http.StatusBadRequest)
-		return
-	}
-	method, err := h.svc.Update(r.Context(), id, input)
+func (h *PaymentMethodHandler) GetByID(c *gin.Context) {
+	id := c.Param("id")
+
+	output, err := h.svc.GetByID(c.Request.Context(), id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 		return
 	}
-	json.NewEncoder(w).Encode(method)
+
+	c.JSON(http.StatusOK, output)
 }
 
-func (h *PaymentMethodHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	if err := h.svc.Delete(r.Context(), id); err != nil {
-		http.Error(w, "not found", http.StatusNotFound)
+func (h *PaymentMethodHandler) Update(c *gin.Context) {
+	id := c.Param("id")
+	var input model.UpdatePaymentMethodInputDTO
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
 		return
 	}
-	w.WriteHeader(http.StatusNoContent)
+
+	output, err := h.svc.Update(c.Request.Context(), id, input)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, output)
+}
+
+func (h *PaymentMethodHandler) Delete(c *gin.Context) {
+	id := c.Param("id")
+
+	if err := h.svc.Delete(c.Request.Context(), id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "fk error"})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }

@@ -10,10 +10,10 @@ import (
 )
 
 type PaymentMethodService interface {
-	Create(ctx context.Context, input model.PaymentMethod) (*model.PaymentMethod, error)
-	GetAll(ctx context.Context) ([]model.PaymentMethod, error)
-	GetByID(ctx context.Context, id string) (*model.PaymentMethod, error)
-	Update(ctx context.Context, id string, input model.PaymentMethod) (*model.PaymentMethod, error)
+	Create(ctx context.Context, input model.CreatePaymentMethodInputDTO) (*model.CreatePaymentMethodOutputDTO, error)
+	GetAll(ctx context.Context) ([]model.PaymentMethodOutputDTO, error)
+	GetByID(ctx context.Context, id string) (*model.PaymentMethodOutputDTO, error)
+	Update(ctx context.Context, id string, input model.UpdatePaymentMethodInputDTO) (*model.PaymentMethodOutputDTO, error)
 	Delete(ctx context.Context, id string) error
 }
 
@@ -25,36 +25,95 @@ func NewPaymentMethodService(repo repository.PaymentMethodRepository) PaymentMet
 	return &paymentMethodService{repo}
 }
 
-func (s *paymentMethodService) Create(ctx context.Context, input model.PaymentMethod) (*model.PaymentMethod, error) {
-	if input.Name == "" || input.Type == "" {
-		return nil, errors.New("name and type are required")
+func (s *paymentMethodService) Create(ctx context.Context, input model.CreatePaymentMethodInputDTO) (*model.CreatePaymentMethodOutputDTO, error) {
+	if input.Type != "credit" && input.Type != "debit" {
+		return nil, errors.New("invalid type")
+	} //TODO: Verificar se é necessário validar aqui ou colocar na struct
+
+	paymentMethod := &model.PaymentMethod{
+		Name:      input.Name,
+		Type:      strings.ToLower(input.Type),
+		AccountID: input.AccountId,
 	}
 
-	input.Type = strings.ToLower(input.Type)
+	err := s.repo.Create(ctx, paymentMethod)
+	if err != nil {
+		return nil, err
+	}
 
-	err := s.repo.Create(ctx, &input)
-	return &input, err
+	output := &model.CreatePaymentMethodOutputDTO{
+		ID:        paymentMethod.ID,
+		Name:      paymentMethod.Name,
+		Type:      paymentMethod.Type,
+		CreatedAt: paymentMethod.CreatedAt,
+		UpdatedAt: paymentMethod.UpdatedAt,
+	}
+
+	return output, err
 }
 
-func (s *paymentMethodService) GetAll(ctx context.Context) ([]model.PaymentMethod, error) {
-	return s.repo.FindAll(ctx)
+func (s *paymentMethodService) GetAll(ctx context.Context) ([]model.PaymentMethodOutputDTO, error) {
+	paymentMethods, err := s.repo.FindAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	output := make([]model.PaymentMethodOutputDTO, len(paymentMethods))
+	for i, paymentMethod := range paymentMethods {
+		output[i] = model.PaymentMethodOutputDTO{
+			ID:        paymentMethod.ID,
+			Name:      paymentMethod.Name,
+			Type:      paymentMethod.Type,
+			AccountID: paymentMethod.AccountID,
+			CreatedAt: paymentMethod.CreatedAt,
+			UpdatedAt: paymentMethod.UpdatedAt,
+		}
+	}
+
+	return output, nil
 }
 
-func (s *paymentMethodService) GetByID(ctx context.Context, id string) (*model.PaymentMethod, error) {
-	return s.repo.FindByID(ctx, id)
+func (s *paymentMethodService) GetByID(ctx context.Context, id string) (*model.PaymentMethodOutputDTO, error) {
+	paymentMethod, err := s.repo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	output := &model.PaymentMethodOutputDTO{
+		ID:        paymentMethod.ID,
+		Name:      paymentMethod.Name,
+		Type:      paymentMethod.Type,
+		AccountID: paymentMethod.AccountID,
+		CreatedAt: paymentMethod.CreatedAt,
+		UpdatedAt: paymentMethod.UpdatedAt,
+	}
+
+	return output, nil
 }
 
-func (s *paymentMethodService) Update(ctx context.Context, id string, input model.PaymentMethod) (*model.PaymentMethod, error) {
+func (s *paymentMethodService) Update(ctx context.Context, id string, input model.UpdatePaymentMethodInputDTO) (*model.PaymentMethodOutputDTO, error) {
 	method, err := s.repo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
 	method.Name = input.Name
-	method.Type = strings.ToLower(input.Type)
 
 	err = s.repo.Update(ctx, method)
-	return method, err
+	if err != nil {
+		return nil, err
+	}
+
+	output := &model.PaymentMethodOutputDTO{
+		ID:        method.ID,
+		Name:      method.Name,
+		Type:      method.Type,
+		AccountID: method.AccountID,
+		CreatedAt: method.CreatedAt,
+		UpdatedAt: method.UpdatedAt,
+	}
+
+	return output, err
 }
 
 func (s *paymentMethodService) Delete(ctx context.Context, id string) error {

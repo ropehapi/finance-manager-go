@@ -93,8 +93,8 @@ func (s *transferService) Cashout(ctx context.Context, input model.CreateCashout
 		return nil, err
 	}
 
+	account, err := s.accountRepo.FindByID(ctx, paymentMethod.AccountID.String())
 	if paymentMethod.Type == "debit" {
-		account, err := s.accountRepo.FindByID(ctx, input.AccountID.String())
 		if err != nil {
 			return nil, err
 		}
@@ -123,7 +123,7 @@ func (s *transferService) Cashout(ctx context.Context, input model.CreateCashout
 		Date:            parsedDate,
 		CategoryID:      input.CategoryID,
 		PaymentMethodID: input.PaymentMethodID,
-		AccountID:       input.AccountID,
+		AccountID:       &paymentMethod.AccountID,
 		Observations:    input.Observations, //TODO: Validar timestamps
 	}
 
@@ -140,7 +140,7 @@ func (s *transferService) Cashout(ctx context.Context, input model.CreateCashout
 		Date:            transfer.Date.String(),
 		CategoryID:      transfer.CategoryID,
 		PaymentMethodID: transfer.PaymentMethodID,
-		AccountID:       transfer.AccountID,
+		AccountID:       &paymentMethod.AccountID, //TODO: Reavaliar posteriormente
 		Observations:    transfer.Observations,
 	}
 	return &output, err

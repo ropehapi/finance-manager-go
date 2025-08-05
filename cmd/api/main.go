@@ -17,6 +17,7 @@ import (
 func main() {
 	//TODO: Adicionar transactions nas operações
 	//TODO: Adicionar filtragem e paginação nas consultas GET
+	//TODO: Fazer relacionamentos no banco
 	_ = godotenv.Load()
 
 	database := db.NewDatabase()
@@ -27,11 +28,11 @@ func main() {
 
 	accountService := service.NewAccountService(accountRepo)
 	transferService := service.NewTransferService(transferRepo, accountRepo, paymentMethodRepo)
-	//paymentMethodService := service.NewPaymentMethodService(paymentMethodRepo)
+	paymentMethodService := service.NewPaymentMethodService(paymentMethodRepo)
 
 	accountHandler := handler.NewAccountHandler(accountService)
 	transferHandler := handler.NewTransferHandler(transferService)
-	//paymentMethodHandler := handler.NewPaymentMethodHandler(paymentMethodService)
+	paymentMethodHandler := handler.NewPaymentMethodHandler(paymentMethodService)
 
 	r := gin.Default()
 	account := r.Group("/accounts")
@@ -47,7 +48,13 @@ func main() {
 	transfer.GET("/", transferHandler.GetAll)
 	transfer.GET("/:id", transferHandler.GetByID)
 	transfer.DELETE("/:id", transferHandler.Delete)
-	//paymentMethodHandler.RegisterRoutes(r)
+
+	paymentMethod := r.Group("/payment-methods")
+	paymentMethod.POST("/", paymentMethodHandler.Create)
+	paymentMethod.GET("/", paymentMethodHandler.GetAll)
+	paymentMethod.GET("/:id", paymentMethodHandler.GetByID)
+	paymentMethod.PUT("/:id", paymentMethodHandler.Update)
+	paymentMethod.DELETE("/:id", paymentMethodHandler.Delete)
 
 	port := os.Getenv("PORT")
 	if port == "" {
