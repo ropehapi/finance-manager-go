@@ -21,6 +21,14 @@ type PaymentMethod struct {
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
+type PaymentMethodFilter struct {
+	Name      string
+	Type      string
+	AccountID string
+	Limit     int
+	Offset    int
+}
+
 type PaymentMethodOutputDTO struct {
 	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`

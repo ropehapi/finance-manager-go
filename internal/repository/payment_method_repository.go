@@ -9,7 +9,7 @@ import (
 
 type PaymentMethodRepository interface {
 	Create(ctx context.Context, method *model.PaymentMethod) error
-	FindAll(ctx context.Context) ([]model.PaymentMethod, error)
+	GetAll(ctx context.Context, filter model.PaymentMethodFilter) ([]model.PaymentMethod, error)
 	FindByID(ctx context.Context, id string) (*model.PaymentMethod, error)
 	Update(ctx context.Context, method *model.PaymentMethod) error
 	Delete(ctx context.Context, id string) error
@@ -27,9 +27,27 @@ func (r *paymentMethodRepository) Create(ctx context.Context, method *model.Paym
 	return r.db.WithContext(ctx).Create(method).Error
 }
 
-func (r *paymentMethodRepository) FindAll(ctx context.Context) ([]model.PaymentMethod, error) {
+func (r *paymentMethodRepository) GetAll(ctx context.Context, filter model.PaymentMethodFilter) ([]model.PaymentMethod, error) {
 	var methods []model.PaymentMethod
-	err := r.db.WithContext(ctx).Find(&methods).Error
+	query := r.db.WithContext(ctx)
+
+	if filter.Name != "" {
+		query = query.Where("name ILIKE ?", "%"+filter.Name+"%")
+	}
+
+	if filter.Type != "" {
+		query = query.Where("type = ?", filter.Type)
+	}
+
+	if filter.AccountID != "" {
+		query = query.Where("account_id = ?", filter.AccountID)
+	}
+
+	err := query.
+		Limit(filter.Limit).
+		Offset(filter.Offset).
+		Find(&methods).Error
+
 	return methods, err
 }
 

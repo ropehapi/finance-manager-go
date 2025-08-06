@@ -9,7 +9,7 @@ import (
 
 type AccountService interface {
 	Create(ctx context.Context, input model.CreateAccountInputDTO) (*model.CreateAccountOutputDTO, error)
-	GetAll(ctx context.Context) ([]model.CreateAccountOutputDTO, error)
+	GetAll(ctx context.Context, filter model.AccountFilter) ([]model.CreateAccountOutputDTO, error)
 	GetByID(ctx context.Context, id string) (*model.CreateAccountOutputDTO, error)
 	Update(ctx context.Context, id string, input model.CreateAccountInputDTO) (*model.CreateAccountOutputDTO, error)
 	Delete(ctx context.Context, id string) error
@@ -52,8 +52,8 @@ func (s *accountService) Create(ctx context.Context, input model.CreateAccountIn
 	return output, nil
 }
 
-func (s *accountService) GetAll(ctx context.Context) ([]model.CreateAccountOutputDTO, error) {
-	accounts, err := s.repo.FindAll(ctx)
+func (s *accountService) GetAll(ctx context.Context, filter model.AccountFilter) ([]model.CreateAccountOutputDTO, error) {
+	accounts, err := s.repo.GetAll(ctx, filter)
 	if err != nil {
 		return nil, err
 	}

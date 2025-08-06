@@ -9,10 +9,9 @@ import (
 
 type Account struct {
 	ID           uuid.UUID `gorm:"type:uuid;primaryKey"`
-	Kind         string    `gorm:"not null"`
 	CurrencyCode string    `gorm:"size:3;not null"` // ex: USD, BRL
-	Name         string    `gorm:"not null"`
 	Balance      int       `gorm:"not null"`
+	Name         string    `gorm:"not null"`
 
 	Transfers []Transfer
 	// PaymentMethods []PaymentMethod
@@ -21,6 +20,13 @@ type Account struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
+}
+
+type AccountFilter struct {
+	Name         string
+	CurrencyCode string
+	Limit        int
+	Offset       int
 }
 
 type CreateAccountInputDTO struct {

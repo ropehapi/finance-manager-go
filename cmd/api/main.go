@@ -15,9 +15,10 @@ import (
 )
 
 func main() {
-	//TODO: Adicionar transactions nas operações
-	//TODO: Adicionar filtragem e paginação nas consultas GET
+	//TODO: Adicionar transactions nas operações: Aparentemente já é feito por padrão no gORM
+	//TODO: Tornar filtragens dos endpoints GET genéricos
 	//TODO: Fazer relacionamentos no banco
+	//TODO: Adicionar testes unitários
 	_ = godotenv.Load()
 
 	database := db.NewDatabase()

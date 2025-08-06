@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"net/http"
+	"strconv"
 
 	"github.com/ropehapi/finance-manager-go/internal/model"
 	"github.com/ropehapi/finance-manager-go/internal/service"
@@ -37,7 +38,35 @@ func (h *AccountHandler) Create(c *gin.Context) {
 }
 
 func (h *AccountHandler) GetAll(c *gin.Context) {
-	output, _ := h.svc.GetAll(c.Request.Context())
+	limitStr := c.DefaultQuery("limit", "10")
+	offsetStr := c.DefaultQuery("offset", "0")
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit <= 0 {
+		limit = 10
+	}
+
+	offset, err := strconv.Atoi(offsetStr)
+	if err != nil || offset < 0 {
+		offset = 0
+	}
+
+	name := c.Query("name")
+	currencyCode := c.Query("currency_code")
+
+	filter := model.AccountFilter{
+		Name:         name,
+		CurrencyCode: currencyCode,
+		Limit:        limit,
+		Offset:       offset,
+	}
+
+	output, err := h.svc.GetAll(c.Request.Context(), filter)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, output)
 }
 

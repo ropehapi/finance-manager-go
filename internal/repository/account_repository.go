@@ -10,7 +10,7 @@ import (
 type AccountRepository interface {
 	Create(ctx context.Context, account *model.Account) error
 	FindByID(ctx context.Context, id string) (*model.Account, error)
-	FindAll(ctx context.Context) ([]model.Account, error)
+	GetAll(ctx context.Context, filter model.AccountFilter) ([]model.Account, error)
 	Update(ctx context.Context, account *model.Account) error
 	Delete(ctx context.Context, id string) error
 }
@@ -35,12 +35,24 @@ func (r *accountRepository) FindByID(ctx context.Context, id string) (*model.Acc
 	return &account, nil
 }
 
-func (r *accountRepository) FindAll(ctx context.Context) ([]model.Account, error) {
+func (r *accountRepository) GetAll(ctx context.Context, filter model.AccountFilter) ([]model.Account, error) {
 	var accounts []model.Account
-	if err := r.db.WithContext(ctx).Find(&accounts).Error; err != nil {
-		return nil, err
+	query := r.db.WithContext(ctx)
+
+	if filter.Name != "" {
+		query = query.Where("name ILIKE ?", "%"+filter.Name+"%")
 	}
-	return accounts, nil
+
+	if filter.CurrencyCode != "" {
+		query = query.Where("currency_code = ?", filter.CurrencyCode)
+	}
+
+	err := query.
+		Limit(filter.Limit).
+		Offset(filter.Offset).
+		Find(&accounts).Error
+
+	return accounts, err
 }
 
 func (r *accountRepository) Update(ctx context.Context, account *model.Account) error {

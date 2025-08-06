@@ -11,7 +11,7 @@ import (
 
 type PaymentMethodService interface {
 	Create(ctx context.Context, input model.CreatePaymentMethodInputDTO) (*model.CreatePaymentMethodOutputDTO, error)
-	GetAll(ctx context.Context) ([]model.PaymentMethodOutputDTO, error)
+	GetAll(ctx context.Context, filter model.PaymentMethodFilter) ([]model.PaymentMethodOutputDTO, error)
 	GetByID(ctx context.Context, id string) (*model.PaymentMethodOutputDTO, error)
 	Update(ctx context.Context, id string, input model.UpdatePaymentMethodInputDTO) (*model.PaymentMethodOutputDTO, error)
 	Delete(ctx context.Context, id string) error
@@ -52,8 +52,8 @@ func (s *paymentMethodService) Create(ctx context.Context, input model.CreatePay
 	return output, err
 }
 
-func (s *paymentMethodService) GetAll(ctx context.Context) ([]model.PaymentMethodOutputDTO, error) {
-	paymentMethods, err := s.repo.FindAll(ctx)
+func (s *paymentMethodService) GetAll(ctx context.Context, filter model.PaymentMethodFilter) ([]model.PaymentMethodOutputDTO, error) {
+	paymentMethods, err := s.repo.GetAll(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
