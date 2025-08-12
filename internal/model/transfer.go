@@ -9,10 +9,10 @@ import (
 
 type Transfer struct {
 	ID          uuid.UUID `gorm:"type:uuid;primaryKey"`
-	Type        string    `gorm:"type:varchar(20) CHECK(type IN ('cashin', 'cashout', 'debt_payment'));not null"` // cashin, cashout, debt_payment
-	Currency    string    `gorm:"size:3;not null;default:'BRL'"`                                                  // ex: BRL, USD
+	Type        string    `gorm:"type:varchar(20);not null"`     // cashin, cashout, debt_payment
+	Currency    string    `gorm:"size:3;not null;default:'BRL'"` // ex: BRL, USD
 	Amount      int       `gorm:"not null"`
-	Category    string    `gorm:"type:varchar(20);not null"`
+	Category    string    `gorm:"type:varchar(20)"` //TODO: Tornar not null?
 	Description string    `gorm:"type:text"`
 	Date        time.Time `gorm:"not null"`
 
@@ -85,4 +85,9 @@ type TransferOutputDTO struct {
 	CreatedAt       time.Time  `json:"created_at"`
 	UpdatedAt       time.Time  `json:"updated_at"`
 	DeletedAt       time.Time  `json:"deleted_at"`
+}
+
+func (p *Transfer) BeforeCreate(tx *gorm.DB) (err error) {
+	p.ID = uuid.New()
+	return
 }

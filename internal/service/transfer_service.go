@@ -22,10 +22,11 @@ type transferService struct {
 	repo              repository.TransferRepository
 	accountRepo       repository.AccountRepository
 	paymentMethodRepo repository.PaymentMethodRepository
+	debtRepo          repository.DebtRepository
 }
 
-func NewTransferService(repo repository.TransferRepository, accountRepo repository.AccountRepository, paymentMethodRepo repository.PaymentMethodRepository) TransferService {
-	return &transferService{repo, accountRepo, paymentMethodRepo}
+func NewTransferService(repo repository.TransferRepository, accountRepo repository.AccountRepository, paymentMethodRepo repository.PaymentMethodRepository, debtRepo repository.DebtRepository) TransferService {
+	return &transferService{repo, accountRepo, paymentMethodRepo, debtRepo}
 }
 
 func (s *transferService) Cashin(ctx context.Context, input model.CreateCashinTransferInputDTO) (*model.CreateCashinTransferOutputDTO, error) {
@@ -107,7 +108,26 @@ func (s *transferService) Cashout(ctx context.Context, input model.CreateCashout
 			return nil, err
 		}
 	} else if paymentMethod.Type == "credit" {
-		//TODO: Implementar incremento de conta a pagar
+		debt, err := s.debtRepo.GetUnpaidAccountForPaymentMethod(ctx, input.PaymentMethodID.String())
+		if err != nil {
+			return nil, err
+		}
+		if debt == nil {
+			debt = &model.Debt{
+				Currency:        input.Currency,
+				Amount:          input.Amount,
+				PaymentMethodID: *input.PaymentMethodID,
+			}
+
+			if err = s.debtRepo.Create(ctx, debt); err != nil {
+				return nil, err
+			}
+		} else {
+			debt.Amount += input.Amount
+			if err = s.debtRepo.Update(ctx, debt); err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	parsedDate, err := time.Parse("2006-01-02", input.Date)

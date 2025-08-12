@@ -29,7 +29,7 @@ func (r *transferRepository) Create(ctx context.Context, transfer *model.Transfe
 
 func (r *transferRepository) FindByID(ctx context.Context, id string) (*model.Transfer, error) {
 	var transfer model.Transfer
-	if err := r.db.WithContext(ctx).Preload("Account").Preload("PaymentMethod").Preload("Category").
+	if err := r.db.WithContext(ctx).Preload("Account").Preload("PaymentMethod").
 		First(&transfer, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func (r *transferRepository) FindByID(ctx context.Context, id string) (*model.Tr
 
 func (r *transferRepository) FindAll(ctx context.Context) ([]model.Transfer, error) {
 	var transfers []model.Transfer
-	if err := r.db.WithContext(ctx).Preload("Account").Preload("PaymentMethod").Preload("Category").
+	if err := r.db.WithContext(ctx).Preload("Account").Preload("PaymentMethod").
 		Find(&transfers).Error; err != nil {
 		return nil, err
 	}

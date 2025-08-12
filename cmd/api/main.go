@@ -21,6 +21,7 @@ func main() {
 	//TODO: Remover category como struct e ser apenas string
 	//TODO: Fazer relacionamentos no banco
 	//TODO: Adicionar testes unitários
+	//TODO: Adicionar type à response de saida das transfers
 	_ = godotenv.Load()
 
 	database := db.NewDatabase()
@@ -29,14 +30,17 @@ func main() {
 	accountRepo := repository.NewAccountRepository(database)
 	transferRepo := repository.NewTransferRepository(database)
 	paymentMethodRepo := repository.NewPaymentMethodRepository(database)
+	debtRepo := repository.NewDebtRepository(database)
 
 	accountService := service.NewAccountService(accountRepo)
-	transferService := service.NewTransferService(transferRepo, accountRepo, paymentMethodRepo)
+	transferService := service.NewTransferService(transferRepo, accountRepo, paymentMethodRepo, debtRepo)
 	paymentMethodService := service.NewPaymentMethodService(paymentMethodRepo)
+	debtService := service.NewDebtService(debtRepo, accountRepo, transferRepo)
 
 	accountHandler := handler.NewAccountHandler(accountService)
 	transferHandler := handler.NewTransferHandler(transferService)
 	paymentMethodHandler := handler.NewPaymentMethodHandler(paymentMethodService)
+	debtHandler := handler.NewDebtHandler(debtService)
 
 	r := gin.Default()
 	account := r.Group("/accounts")
@@ -59,6 +63,11 @@ func main() {
 	paymentMethod.GET("/:id", paymentMethodHandler.GetByID)
 	paymentMethod.PUT("/:id", paymentMethodHandler.Update)
 	paymentMethod.DELETE("/:id", paymentMethodHandler.Delete)
+
+	debt := r.Group("/debts")
+	debt.GET("/", debtHandler.GetAll)
+	debt.POST("/pay/:id/:payer_account_id", debtHandler.Pay)
+	debt.DELETE("/:id", debtHandler.Delete)
 
 	port := os.Getenv("PORT")
 	if port == "" {

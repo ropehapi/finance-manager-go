@@ -37,3 +37,8 @@ type CreateAccountOutputDTO struct {
 	Balance      int       `json:"balance"`
 	Name         string    `json:"name"`
 }
+
+func (p *Account) BeforeCreate(tx *gorm.DB) (err error) {
+	p.ID = uuid.New()
+	return
+}
