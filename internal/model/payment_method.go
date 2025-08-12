@@ -10,11 +10,10 @@ import (
 type PaymentMethod struct {
 	ID        uuid.UUID `gorm:"type:uuid;primaryKey"`
 	Name      string    `gorm:"not null"`
-	Type      string    `gorm:"not null"` // ex: credit_card, debit_card, pix
+	Type      string    `gorm:"not null; type: varchar(20) CHECK(type IN ('credit_card', 'debit_card', 'pix'))"` // ex: credit_card, debit_card, pix
 	AccountID uuid.UUID `gorm:"type:uuid;not null"`
 
-	Transfers []Transfer
-	Debts     []Debt
+	Account Account `gorm:"foreignKey:AccountID"`
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -55,9 +54,4 @@ type CreatePaymentMethodOutputDTO struct { //TODO: Avaliar duplicidade
 
 type UpdatePaymentMethodInputDTO struct {
 	Name string `json:"name" binding:"required"`
-}
-
-func (p *PaymentMethod) BeforeCreate(tx *gorm.DB) (err error) {
-	p.ID = uuid.New()
-	return
 }

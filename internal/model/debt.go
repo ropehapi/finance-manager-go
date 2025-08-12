@@ -9,20 +9,16 @@ import (
 
 type Debt struct {
 	ID              uuid.UUID `gorm:"type:uuid;primaryKey"`
-	AccountID       uuid.UUID `gorm:"type:uuid;not null"`
-	Account         Account   `gorm:"foreignKey:AccountID"`
+	Currency        string    `gorm:"type:text;default:'BRL';not null"`
+	Amount          int       `gorm:"not null"`
 	PaymentMethodID uuid.UUID `gorm:"type:uuid;not null"`
-	PaymentMethod   PaymentMethod
+	PayerAccountID  uuid.UUID `gorm:"type:uuid"`
+	Paid            bool      `gorm:"not null;default:false"`
 
-	Amount int  `gorm:"not null"`
-	Paid   bool `gorm:"not null;default:false"`
+	PayerAccount  Account       `gorm:"foreignKey:PayerAccountID"`
+	PaymentMethod PaymentMethod `gorm:"foreignKey:PaymentMethodID"`
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
-}
-
-func (d *Debt) BeforeCreate(tx *gorm.DB) (err error) {
-	d.ID = uuid.New()
-	return
 }
