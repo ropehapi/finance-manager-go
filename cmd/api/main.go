@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/ropehapi/finance-manager-go/migrations"
 	"log"
 	"net/http"
 	"os"
@@ -23,6 +24,7 @@ func main() {
 	_ = godotenv.Load()
 
 	database := db.NewDatabase()
+	migrations.Migrate(database)
 
 	accountRepo := repository.NewAccountRepository(database)
 	transferRepo := repository.NewTransferRepository(database)

@@ -57,7 +57,7 @@ func (s *transferService) Cashin(ctx context.Context, input model.CreateCashinTr
 		Amount:       input.Amount,
 		Description:  input.Description,
 		Date:         parsedDate,
-		CategoryID:   input.CategoryID,
+		Category:     input.Category,
 		AccountID:    input.AccountID,
 		Observations: input.Observations,
 	}
@@ -73,7 +73,7 @@ func (s *transferService) Cashin(ctx context.Context, input model.CreateCashinTr
 		Amount:       transfer.Amount,
 		Description:  transfer.Description,
 		Date:         transfer.Date.String(),
-		CategoryID:   transfer.CategoryID,
+		Category:     transfer.Category,
 		AccountID:    transfer.AccountID,
 		Observations: transfer.Observations,
 	}
@@ -121,7 +121,7 @@ func (s *transferService) Cashout(ctx context.Context, input model.CreateCashout
 		Amount:          input.Amount,
 		Description:     input.Description,
 		Date:            parsedDate,
-		CategoryID:      input.CategoryID,
+		Category:        input.Category,
 		PaymentMethodID: input.PaymentMethodID,
 		AccountID:       &paymentMethod.AccountID,
 		Observations:    input.Observations, //TODO: Validar timestamps
@@ -138,7 +138,7 @@ func (s *transferService) Cashout(ctx context.Context, input model.CreateCashout
 		Amount:          transfer.Amount,
 		Description:     transfer.Description,
 		Date:            transfer.Date.String(),
-		CategoryID:      transfer.CategoryID,
+		Category:        transfer.Category,
 		PaymentMethodID: transfer.PaymentMethodID,
 		AccountID:       &paymentMethod.AccountID, //TODO: Reavaliar posteriormente
 		Observations:    transfer.Observations,
@@ -160,7 +160,7 @@ func (s *transferService) GetAll(ctx context.Context) ([]model.TransferOutputDTO
 			Amount:       transaction.Amount,
 			Description:  transaction.Description,
 			Date:         transaction.Date.String(),
-			CategoryID:   transaction.CategoryID, //TODO: Devolver nomes envés de ids
+			Category:     transaction.Category, //TODO: Devolver nomes envés de ids
 			AccountID:    transaction.AccountID,
 			Observations: transaction.Observations,
 			CreatedAt:    transaction.CreatedAt,
@@ -182,7 +182,7 @@ func (s *transferService) GetByID(ctx context.Context, id string) (*model.Transf
 		Amount:          transfer.Amount,
 		Description:     transfer.Description,
 		Date:            transfer.Date.String(),
-		CategoryID:      transfer.CategoryID,
+		Category:        transfer.Category,
 		PaymentMethodID: transfer.PaymentMethodID,
 		AccountID:       transfer.AccountID,
 		Observations:    transfer.Observations,

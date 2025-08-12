@@ -12,11 +12,9 @@ type Transfer struct {
 	Type        string    `gorm:"type:varchar(20) CHECK(type IN ('cashin', 'cashout', 'debt_payment'));not null"` // cashin, cashout, debt_payment
 	Currency    string    `gorm:"size:3;not null;default:'BRL'"`                                                  // ex: BRL, USD
 	Amount      int       `gorm:"not null"`
+	Category    string    `gorm:"type:varchar(20);not null"`
 	Description string    `gorm:"type:text"`
 	Date        time.Time `gorm:"not null"`
-
-	CategoryID *uuid.UUID `gorm:"type:uuid"`
-	Category   *Category  `gorm:"foreignKey:CategoryID"`
 
 	PaymentMethodID *uuid.UUID     `gorm:"type:uuid"`
 	PaymentMethod   *PaymentMethod `gorm:"foreignKey:PaymentMethodID"`
@@ -36,7 +34,7 @@ type CreateCashinTransferInputDTO struct {
 	Amount       int        `json:"amount" binding:"required"`
 	Description  string     `json:"description" binding:"required"`
 	Date         string     `json:"date" binding:"required"`
-	CategoryID   *uuid.UUID `json:"category_id"`
+	Category     string     `json:"category"`
 	AccountID    *uuid.UUID `json:"account_id" binding:"required"`
 	Observations string     `json:"observations"`
 }
@@ -47,7 +45,7 @@ type CreateCashinTransferOutputDTO struct {
 	Amount       int        `json:"amount"`
 	Description  string     `json:"description"`
 	Date         string     `json:"date"`
-	CategoryID   *uuid.UUID `json:"category_id"` //TODO: Tornar obrigatório quando implementar
+	Category     string     `json:"category"` //TODO: Tornar obrigatório quando implementar
 	AccountID    *uuid.UUID `json:"account_id" binding:"required"`
 	Observations string     `json:"observations"`
 }
@@ -57,7 +55,7 @@ type CreateCashoutTransferInputDTO struct {
 	Amount          int        `json:"amount" binding:"required"`
 	Description     string     `json:"description" binding:"required"`
 	Date            string     `json:"date" binding:"required"`
-	CategoryID      *uuid.UUID `json:"category_id"`       //TODO: Tornar obrigatório quando implementar
+	Category        string     `json:"category"`          //TODO: Tornar obrigatório quando implementar
 	PaymentMethodID *uuid.UUID `json:"payment_method_id"` //TODO: Tornar obrigatório quando implementar
 	Observations    string     `json:"observations"`
 }
@@ -68,7 +66,7 @@ type CreateCashoutTransferOutputDTO struct {
 	Amount          int        `json:"amount"`
 	Description     string     `json:"description"`
 	Date            string     `json:"date"`
-	CategoryID      *uuid.UUID `json:"category_id"`
+	Category        string     `json:"category"`
 	PaymentMethodID *uuid.UUID `json:"payment_method_id"`
 	AccountID       *uuid.UUID `json:"account_id"`
 	Observations    string     `json:"observations"`
@@ -80,16 +78,11 @@ type TransferOutputDTO struct {
 	Amount          int        `json:"amount"`
 	Description     string     `json:"description"`
 	Date            string     `json:"date"`
-	CategoryID      *uuid.UUID `json:"category_id"`
+	Category        string     `json:"category"`
 	PaymentMethodID *uuid.UUID `json:"payment_method_id"`
 	AccountID       *uuid.UUID `json:"account_id"`
 	Observations    string     `json:"observations"`
 	CreatedAt       time.Time  `json:"created_at"`
 	UpdatedAt       time.Time  `json:"updated_at"`
 	DeletedAt       time.Time  `json:"deleted_at"`
-}
-
-func (t *Transfer) BeforeCreate(tx *gorm.DB) (err error) {
-	t.ID = uuid.New()
-	return
 }
