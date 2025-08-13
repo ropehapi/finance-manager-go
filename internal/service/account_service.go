@@ -24,13 +24,6 @@ func NewAccountService(repo repository.AccountRepository) AccountService {
 }
 
 func (s *accountService) Create(ctx context.Context, input model.CreateAccountInputDTO) (*model.CreateAccountOutputDTO, error) {
-	if input.Balance < 0 {
-		return nil, errors.New("balance must not be negative")
-	}
-	if input.CurrencyCode == "" || len(input.CurrencyCode) != 3 {
-		return nil, errors.New("invalid currency code")
-	} //TODO: Verificar se é necessário validar aqui ou colocar na struct
-
 	account := &model.Account{
 		Balance:      input.Balance,
 		CurrencyCode: input.CurrencyCode,

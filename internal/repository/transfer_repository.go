@@ -10,7 +10,7 @@ import (
 type TransferRepository interface {
 	Create(ctx context.Context, transfer *model.Transfer) error
 	FindByID(ctx context.Context, id string) (*model.Transfer, error)
-	FindAll(ctx context.Context) ([]model.Transfer, error)
+	GetAll(ctx context.Context, filter model.TransferFilter) ([]model.Transfer, error)
 	Update(ctx context.Context, transfer *model.Transfer) error
 	Delete(ctx context.Context, id string) error
 }
@@ -36,12 +36,29 @@ func (r *transferRepository) FindByID(ctx context.Context, id string) (*model.Tr
 	return &transfer, nil
 }
 
-func (r *transferRepository) FindAll(ctx context.Context) ([]model.Transfer, error) {
+func (r *transferRepository) GetAll(ctx context.Context, filter model.TransferFilter) ([]model.Transfer, error) {
 	var transfers []model.Transfer
-	if err := r.db.WithContext(ctx).Preload("Account").Preload("PaymentMethod").
-		Find(&transfers).Error; err != nil {
+	query := r.db.WithContext(ctx)
+
+	if filter.Type != "" {
+		query = query.Where("type = ?", filter.Type)
+	}
+
+	if filter.Category != "" {
+		query = query.Where("category ILIKE ?", "%"+filter.Category+"%")
+	}
+
+	err := query.
+		Limit(filter.Limit).
+		Offset(filter.Offset).
+		Preload("Account").
+		Preload("PaymentMethod").
+		Find(&transfers).Error
+
+	if err != nil {
 		return nil, err
 	}
+
 	return transfers, nil
 }
 

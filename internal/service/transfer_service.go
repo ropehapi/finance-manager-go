@@ -13,7 +13,7 @@ import (
 type TransferService interface {
 	Cashin(ctx context.Context, input model.CreateCashinTransferInputDTO) (*model.CreateCashinTransferOutputDTO, error)
 	Cashout(ctx context.Context, input model.CreateCashoutTransferInputDTO) (*model.CreateCashoutTransferOutputDTO, error)
-	GetAll(ctx context.Context) ([]model.TransferOutputDTO, error)
+	GetAll(ctx context.Context, filter model.TransferFilter) ([]model.TransferOutputDTO, error)
 	GetByID(ctx context.Context, id string) (*model.TransferOutputDTO, error)
 	Delete(ctx context.Context, id string) error
 }
@@ -32,9 +32,6 @@ func NewTransferService(repo repository.TransferRepository, accountRepo reposito
 func (s *transferService) Cashin(ctx context.Context, input model.CreateCashinTransferInputDTO) (*model.CreateCashinTransferOutputDTO, error) {
 	if input.Amount <= 0 {
 		return nil, errors.New("amount must be positive")
-	}
-	if input.Currency == "" || len(input.Currency) != 3 {
-		return nil, errors.New("invalid currency")
 	}
 
 	account, err := s.accountRepo.FindByID(ctx, input.AccountID.String())
@@ -70,6 +67,7 @@ func (s *transferService) Cashin(ctx context.Context, input model.CreateCashinTr
 
 	output := model.CreateCashinTransferOutputDTO{
 		ID:           transfer.ID,
+		Type:         transfer.Type,
 		Currency:     transfer.Currency,
 		Amount:       transfer.Amount,
 		Description:  transfer.Description,
@@ -84,9 +82,6 @@ func (s *transferService) Cashin(ctx context.Context, input model.CreateCashinTr
 func (s *transferService) Cashout(ctx context.Context, input model.CreateCashoutTransferInputDTO) (*model.CreateCashoutTransferOutputDTO, error) {
 	if input.Amount <= 0 {
 		return nil, errors.New("amount must be positive")
-	}
-	if input.Currency == "" || len(input.Currency) != 3 { //TODO: Adicionar tratamento para BRL default
-		return nil, errors.New("invalid currency")
 	}
 
 	paymentMethod, err := s.paymentMethodRepo.FindByID(ctx, input.PaymentMethodID.String())
@@ -144,7 +139,7 @@ func (s *transferService) Cashout(ctx context.Context, input model.CreateCashout
 		Category:        input.Category,
 		PaymentMethodID: input.PaymentMethodID,
 		AccountID:       &paymentMethod.AccountID,
-		Observations:    input.Observations, //TODO: Validar timestamps
+		Observations:    input.Observations,
 	}
 
 	err = s.repo.Create(ctx, &transfer)
@@ -154,6 +149,7 @@ func (s *transferService) Cashout(ctx context.Context, input model.CreateCashout
 
 	output := model.CreateCashoutTransferOutputDTO{
 		ID:              transfer.ID,
+		Type:            transfer.Type,
 		Currency:        transfer.Currency,
 		Amount:          transfer.Amount,
 		Description:     transfer.Description,
@@ -166,8 +162,8 @@ func (s *transferService) Cashout(ctx context.Context, input model.CreateCashout
 	return &output, err
 }
 
-func (s *transferService) GetAll(ctx context.Context) ([]model.TransferOutputDTO, error) {
-	transactions, err := s.repo.FindAll(ctx)
+func (s *transferService) GetAll(ctx context.Context, filter model.TransferFilter) ([]model.TransferOutputDTO, error) {
+	transactions, err := s.repo.GetAll(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
@@ -176,11 +172,12 @@ func (s *transferService) GetAll(ctx context.Context) ([]model.TransferOutputDTO
 	for i, transaction := range transactions {
 		output[i] = model.TransferOutputDTO{
 			ID:           transaction.ID,
+			Type:         transaction.Type,
 			Currency:     transaction.Currency,
 			Amount:       transaction.Amount,
 			Description:  transaction.Description,
 			Date:         transaction.Date.String(),
-			Category:     transaction.Category, //TODO: Devolver nomes envés de ids
+			Category:     transaction.Category,
 			AccountID:    transaction.AccountID,
 			Observations: transaction.Observations,
 			CreatedAt:    transaction.CreatedAt,
@@ -198,6 +195,7 @@ func (s *transferService) GetByID(ctx context.Context, id string) (*model.Transf
 
 	return &model.TransferOutputDTO{
 		ID:              transfer.ID,
+		Type:            transfer.Type,
 		Currency:        transfer.Currency,
 		Amount:          transfer.Amount,
 		Description:     transfer.Description,

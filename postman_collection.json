@@ -1,111 +1,286 @@
 {
-  "info": {
-    "name": "Finance Manager Go API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_postman_id": "finance-manager-go-api-collection"
-  },
-  "item": [
-    {
-      "name": "Health Check",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:8080/health",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "8080",
-          "path": ["health"]
-        }
-      }
-    },
-    {
-      "name": "List Accounts",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:8080/accounts",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "8080",
-          "path": ["accounts"]
-        }
-      }
-    },
-    {
-      "name": "Create Account",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"kind\": \"personal\",\n  \"currencyCode\": \"BRL\",\n  \"name\": \"Conta Corrente\",\n  \"balance\": 100000\n}"
-        },
-        "url": {
-          "raw": "http://localhost:8080/accounts",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "8080",
-          "path": ["accounts"]
-        }
-      }
-    },
-    {
-      "name": "Get Account by ID",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:8080/accounts/{{account_id}}",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "8080",
-          "path": ["accounts", "{{account_id}}"]
-        }
-      }
-    },
-    {
-      "name": "Update Account",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"kind\": \"personal\",\n  \"currencyCode\": \"USD\",\n  \"name\": \"Conta Atualizada\",\n  \"balance\": 120000\n}"
-        },
-        "url": {
-          "raw": "http://localhost:8080/accounts/{{account_id}}",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "8080",
-          "path": ["accounts", "{{account_id}}"]
-        }
-      }
-    },
-    {
-      "name": "Delete Account",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:8080/accounts/{{account_id}}",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "8080",
-          "path": ["accounts", "{{account_id}}"]
-        }
-      }
-    }
-  ]
+	"info": {
+		"_postman_id": "05e27063-4822-406c-9844-4094011876cb",
+		"name": "Finance Manager Go API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "18448722"
+	},
+	"item": [
+		{
+			"name": "Accounts",
+			"item": [
+				{
+					"name": "List Accounts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/accounts"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Account",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currencyCode\": \"BRL\",\n  \"name\": \"Conta corrente C6\",\n  \"balance\": 5000\n}"
+						},
+						"url": "http://localhost:8080/accounts"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Account by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/accounts/{{account_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Account",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"kind\": \"personal\",\n  \"currencyCode\": \"BRL\",\n  \"name\": \"Conta Bradesco nova\",\n  \"balance\": 30000\n}"
+						},
+						"url": "http://localhost:8080/accounts/{{account_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Account",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "http://localhost:8080/accounts/{{account_id}}"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Transfer",
+			"item": [
+				{
+					"name": "Get transfers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}:{{BASE_PORT}}/transfers?type=cashin",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"port": "{{BASE_PORT}}",
+							"path": [
+								"transfers"
+							],
+							"query": [
+								{
+									"key": "category",
+									"value": "comida",
+									"disabled": true
+								},
+								{
+									"key": "type",
+									"value": "cashin"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Transfer by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": "{{BASE_URL}}:{{BASE_PORT}}/transfers/{{transfer_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Cashin",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n//   \"currency\": \"BRL\",\n  \"amount\": 265100,\n  \"description\": \"Salário\",\n  \"category\": \"salario\",\n  \"date\": \"2025-08-15\",\n  \"observations\": \"\",\n  \"account_id\": \"12345678-0000-0000-0000-000000000000\"\n}\n"
+						},
+						"url": "{{BASE_URL}}:{{BASE_PORT}}/transfers/cashin"
+					},
+					"response": []
+				},
+				{
+					"name": "cashout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currency\": \"BRL\",\n  \"amount\": 200000,\n  \"description\": \"Aporte dólar picnic\",\n  \"date\": \"2025-08-13\",\n  \"category\": \"investimentos\",\n  \"payment_method_id\": \"bf89d9d8-f363-44e5-b3d8-29d3dd1bdf80\",\n  \"observations\": \"\"\n}\n"
+						},
+						"url": "{{BASE_URL}}:{{BASE_PORT}}/transfers/cashout"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete transfer",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": "{{BASE_URL}}:{{BASE_PORT}}/transfers/{{transfer_id}}"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Payment methods",
+			"item": [
+				{
+					"name": "Create Payment method",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Cartão Itaú Firma\",\n    \"type\": \"credit\",\n    \"accountId\": \"12345678-0000-0000-0000-000000000000\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{BASE_URL}}:{{BASE_PORT}}/payment-methods"
+					},
+					"response": []
+				},
+				{
+					"name": "Update payment method",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Cartão Itaú Firma\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{BASE_URL}}:{{BASE_PORT}}/payment-methods/{{payment_method_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{BASE_URL}}:{{BASE_PORT}}/payment-methods"
+					},
+					"response": []
+				},
+				{
+					"name": "GetById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{BASE_URL}}:{{BASE_PORT}}/payment-methods/{{payment_method_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete payment method",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{BASE_URL}}:{{BASE_PORT}}/payment-methods/{{payment_method_id}}"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Debts",
+			"item": [
+				{
+					"name": "Get Debts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": "{{BASE_URL}}:{{BASE_PORT}}/debts/"
+					},
+					"response": []
+				},
+				{
+					"name": "Pay",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": "{{BASE_URL}}:{{BASE_PORT}}/debts/pay/{{debt_id}}/{{payer_account_id}}"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8080/health"
+			},
+			"response": []
+		}
+	]
 }

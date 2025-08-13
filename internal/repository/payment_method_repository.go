@@ -48,7 +48,11 @@ func (r *paymentMethodRepository) GetAll(ctx context.Context, filter model.Payme
 		Offset(filter.Offset).
 		Find(&methods).Error
 
-	return methods, err
+	if err != nil {
+		return nil, err
+	}
+
+	return methods, nil
 }
 
 func (r *paymentMethodRepository) FindByID(ctx context.Context, id string) (*model.PaymentMethod, error) {

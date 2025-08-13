@@ -16,12 +16,11 @@ import (
 )
 
 func main() {
-	//TODO: Adicionar transactions nas operações: Aparentemente já é feito por padrão no gORM
-	//TODO: Tornar filtragens dos endpoints GET genéricos
-	//TODO: Remover category como struct e ser apenas string
 	//TODO: Fazer relacionamentos no banco
+	//TODO: Adicionar validações de enum no banco
+	//TODO: Adicionar fks ao banco
 	//TODO: Adicionar testes unitários
-	//TODO: Adicionar type à response de saida das transfers
+	//TODO: Criar comandos de make para testar fluxos
 	_ = godotenv.Load()
 
 	database := db.NewDatabase()

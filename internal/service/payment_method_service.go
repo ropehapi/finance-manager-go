@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 	"strings"
 
 	"github.com/ropehapi/finance-manager-go/internal/model"
@@ -10,7 +9,7 @@ import (
 )
 
 type PaymentMethodService interface {
-	Create(ctx context.Context, input model.CreatePaymentMethodInputDTO) (*model.CreatePaymentMethodOutputDTO, error)
+	Create(ctx context.Context, input model.CreatePaymentMethodInputDTO) (*model.PaymentMethodOutputDTO, error)
 	GetAll(ctx context.Context, filter model.PaymentMethodFilter) ([]model.PaymentMethodOutputDTO, error)
 	GetByID(ctx context.Context, id string) (*model.PaymentMethodOutputDTO, error)
 	Update(ctx context.Context, id string, input model.UpdatePaymentMethodInputDTO) (*model.PaymentMethodOutputDTO, error)
@@ -25,11 +24,7 @@ func NewPaymentMethodService(repo repository.PaymentMethodRepository) PaymentMet
 	return &paymentMethodService{repo}
 }
 
-func (s *paymentMethodService) Create(ctx context.Context, input model.CreatePaymentMethodInputDTO) (*model.CreatePaymentMethodOutputDTO, error) {
-	if input.Type != "credit" && input.Type != "debit" {
-		return nil, errors.New("invalid type")
-	} //TODO: Verificar se é necessário validar aqui ou colocar na struct
-
+func (s *paymentMethodService) Create(ctx context.Context, input model.CreatePaymentMethodInputDTO) (*model.PaymentMethodOutputDTO, error) {
 	paymentMethod := &model.PaymentMethod{
 		Name:      input.Name,
 		Type:      strings.ToLower(input.Type),
@@ -41,7 +36,7 @@ func (s *paymentMethodService) Create(ctx context.Context, input model.CreatePay
 		return nil, err
 	}
 
-	output := &model.CreatePaymentMethodOutputDTO{
+	output := &model.PaymentMethodOutputDTO{
 		ID:        paymentMethod.ID,
 		Name:      paymentMethod.Name,
 		Type:      paymentMethod.Type,

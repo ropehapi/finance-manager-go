@@ -21,7 +21,7 @@ func (h *PaymentMethodHandler) Create(c *gin.Context) {
 	var input model.CreatePaymentMethodInputDTO
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 

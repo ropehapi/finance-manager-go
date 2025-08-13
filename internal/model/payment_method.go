@@ -39,17 +39,8 @@ type PaymentMethodOutputDTO struct {
 
 type CreatePaymentMethodInputDTO struct {
 	Name      string    `json:"name" binding:"required"`
-	Type      string    `json:"type" binding:"required"`
+	Type      string    `json:"type" binding:"required,oneof=credit debit"`
 	AccountId uuid.UUID `json:"accountId" binding:"required"`
-}
-
-type CreatePaymentMethodOutputDTO struct { //TODO: Avaliar duplicidade
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	Type      string    `json:"type"`
-	AccountID uuid.UUID `json:"accountId"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 type UpdatePaymentMethodInputDTO struct {
