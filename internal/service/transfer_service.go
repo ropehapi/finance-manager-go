@@ -233,7 +233,17 @@ func (s *transferService) Delete(ctx context.Context, id string) error {
 		if paymentMethod.Type == "debit" {
 			account.Balance += transfer.Amount
 		} else if paymentMethod.Type == "credit" {
-			//TODO: Implementar decremento de conta a pagar
+			debt, err := s.debtRepo.GetUnpaidAccountForPaymentMethod(ctx, transfer.PaymentMethodID.String())
+			if err != nil {
+				return err
+			}
+			if debt == nil {
+				return errors.New("Debt is already payed")
+			}
+			debt.Amount -= transfer.Amount
+			if err = s.debtRepo.Update(ctx, debt); err != nil {
+				return err
+			}
 		}
 	}
 
