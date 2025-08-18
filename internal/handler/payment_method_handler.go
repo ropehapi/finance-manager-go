@@ -27,7 +27,7 @@ func (h *PaymentMethodHandler) Create(c *gin.Context) {
 
 	output, err := h.svc.Create(c.Request.Context(), input)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -62,7 +62,7 @@ func (h *PaymentMethodHandler) GetAll(c *gin.Context) {
 
 	output, err := h.svc.GetAll(c.Request.Context(), filter)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -74,7 +74,7 @@ func (h *PaymentMethodHandler) GetByID(c *gin.Context) {
 
 	output, err := h.svc.GetByID(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -92,7 +92,7 @@ func (h *PaymentMethodHandler) Update(c *gin.Context) {
 
 	output, err := h.svc.Update(c.Request.Context(), id, input)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -103,7 +103,7 @@ func (h *PaymentMethodHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
 
 	if err := h.svc.Delete(c.Request.Context(), id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "fk error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

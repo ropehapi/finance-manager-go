@@ -74,7 +74,7 @@ func (h *AccountHandler) GetByID(c *gin.Context) {
 	id := c.Param("id")
 	output, err := h.svc.GetByID(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, output)
@@ -91,7 +91,7 @@ func (h *AccountHandler) Update(c *gin.Context) {
 
 	output, err := h.svc.Update(c.Request.Context(), id, input)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -101,7 +101,7 @@ func (h *AccountHandler) Update(c *gin.Context) {
 func (h *AccountHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
 	if err := h.svc.Delete(c.Request.Context(), id); err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.Status(http.StatusNoContent)

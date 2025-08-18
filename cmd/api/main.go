@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/ropehapi/finance-manager-go/migrations"
+	"github.com/ropehapi/finance-manager-go/pkg/middleware"
 	"log"
 	"net/http"
 	"os"
@@ -13,12 +14,10 @@ import (
 	"github.com/ropehapi/finance-manager-go/internal/repository"
 	"github.com/ropehapi/finance-manager-go/internal/service"
 	"github.com/ropehapi/finance-manager-go/pkg/db"
+	"github.com/ropehapi/kaizen-auth-service/pkg/jwt"
 )
 
 func main() {
-	//TODO: Fazer relacionamentos no banco
-	//TODO: Adicionar validações de enum no banco
-	//TODO: Adicionar fks ao banco
 	//TODO: Adicionar testes unitários
 	//TODO: Criar comandos de make para testar fluxos
 	_ = godotenv.Load()
@@ -42,6 +41,7 @@ func main() {
 	debtHandler := handler.NewDebtHandler(debtService)
 
 	r := gin.Default()
+	r.Use(middleware.AdaptHTTPMiddleware(jwt.ValidateToken))
 	account := r.Group("/accounts")
 	account.POST("/", accountHandler.Create)
 	account.GET("/", accountHandler.GetAll)

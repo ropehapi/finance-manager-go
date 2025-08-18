@@ -156,7 +156,7 @@ func (s *transferService) Cashout(ctx context.Context, input model.CreateCashout
 		Date:            transfer.Date.String(),
 		Category:        transfer.Category,
 		PaymentMethodID: transfer.PaymentMethodID,
-		AccountID:       &paymentMethod.AccountID, //TODO: Reavaliar posteriormente
+		AccountID:       &paymentMethod.AccountID,
 		Observations:    transfer.Observations,
 	}
 	return &output, err

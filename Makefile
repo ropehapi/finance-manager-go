@@ -1,5 +1,6 @@
 # Variáveis
 APP_NAME=finance-manager-go
+API_HOST=http://localhost
 API_PORT=8080
 
 # Builda a imagem da API
@@ -28,17 +29,22 @@ rebuild:
 
 # Testa se a API está respondendo
 health:
-	curl -i http://localhost:$(API_PORT)/health
+	curl -i $(API_HOST):$(API_PORT)/health
 
 # Lista as contas cadastradas
 list-accounts:
-	curl -s http://localhost:$(API_PORT)/accounts | jq
+	curl -s $(API_HOST):$(API_PORT)/accounts | jq
 
 # Cria uma nova conta
 create-account:
-	curl -X POST http://localhost:$(API_PORT)/accounts \
-		-H "Content-Type: application/json" \
-		-d '{"kind":"personal","currencyCode":"BRL","name":"Conta Corrente","balance":100000}' | jq
+	curl --location '$(API_HOST):$(API_PORT)/accounts' \
+    --header 'Content-Type: application/json' \
+    --data '{"currencyCode": "BRL","name": "Conta corrente C6","balance": 50000}'
+
+create-payment-method:
+	curl --location '$(API_HOST):$(API_PORT)/payment-methods' \
+    --header 'Content-Type: application/json' \
+    --data '{"name": "Pix conta C6","type": "pix","accountId": "f853ea7d-adba-4691-b80b-5f2f3add8525"}'
 
 # Faz um commit
 gcm:

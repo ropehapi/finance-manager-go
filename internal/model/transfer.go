@@ -9,7 +9,7 @@ import (
 
 type Transfer struct {
 	ID          uuid.UUID `gorm:"type:uuid;primaryKey"`
-	Type        string    `gorm:"type:varchar(20);not null"` // cashin, cashout, debt_payment
+	Type        string    `gorm:"type:varchar(20);not null;check:type IN ('cashin','cashout','debt_payment')"`
 	Currency    string    `gorm:"size:3;not null;default:'BRL'"`
 	Amount      int       `gorm:"not null"`
 	Category    string    `gorm:"type:varchar(20);not null"`
@@ -26,7 +26,7 @@ type Transfer struct {
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	//DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 type TransferFilter struct {

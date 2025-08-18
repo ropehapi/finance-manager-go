@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 	"github.com/ropehapi/finance-manager-go/internal/model"
 	"github.com/ropehapi/finance-manager-go/internal/repository"
 )

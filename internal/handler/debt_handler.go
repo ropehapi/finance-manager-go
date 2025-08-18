@@ -17,7 +17,7 @@ func NewDebtHandler(svc service.DebtService) *DebtHandler {
 func (h *DebtHandler) GetAll(c *gin.Context) {
 	output, err := h.svc.GetAll(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -30,7 +30,7 @@ func (h *DebtHandler) Pay(c *gin.Context) {
 
 	output, err := h.svc.Pay(c.Request.Context(), id, payerAccountId)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": output})
@@ -40,7 +40,7 @@ func (h *DebtHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
 
 	if err := h.svc.Delete(c.Request.Context(), id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "fk error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

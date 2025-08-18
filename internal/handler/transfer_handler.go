@@ -78,7 +78,7 @@ func (h *TransferHandler) GetAll(c *gin.Context) {
 
 	output, err := h.svc.GetAll(c.Request.Context(), filter)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, output)
@@ -94,7 +94,7 @@ func (h *TransferHandler) GetByID(c *gin.Context) {
 
 	output, err := h.svc.GetByID(c.Request.Context(), idParam)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -110,7 +110,7 @@ func (h *TransferHandler) Delete(c *gin.Context) {
 	}
 
 	if err := h.svc.Delete(c.Request.Context(), idParam); err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

@@ -10,14 +10,14 @@ import (
 type PaymentMethod struct {
 	ID        uuid.UUID `gorm:"type:uuid;primaryKey"`
 	Name      string    `gorm:"not null"`
-	Type      string    `gorm:"not null; type: varchar(20)"` // ex: credit_card, debit_card, pix
+	Type      string    `gorm:"type:varchar(20);not null;check:type IN ('credit','debit','pix')"`
 	AccountID uuid.UUID `gorm:"type:uuid;not null"`
 
 	Account Account `gorm:"foreignKey:AccountID"`
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	//DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 type PaymentMethodFilter struct {
@@ -39,7 +39,7 @@ type PaymentMethodOutputDTO struct {
 
 type CreatePaymentMethodInputDTO struct {
 	Name      string    `json:"name" binding:"required"`
-	Type      string    `json:"type" binding:"required,oneof=credit debit"`
+	Type      string    `json:"type" binding:"required,oneof=credit debit pix"`
 	AccountId uuid.UUID `json:"accountId" binding:"required"`
 }
 

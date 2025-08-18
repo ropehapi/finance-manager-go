@@ -15,7 +15,7 @@ type Account struct {
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	//DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 type AccountFilter struct {

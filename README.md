@@ -1,7 +1,7 @@
 
 # 💰 Finance Manager Go
 
-API REST para gerenciamento de contas, escrita em Go utilizando GORM, PostgreSQL, chi e Docker.
+API REST para gerenciamento de contas, escrita em Go utilizando GORM, PostgreSQL, Gin e Docker.
 
 ---
 
@@ -10,7 +10,7 @@ API REST para gerenciamento de contas, escrita em Go utilizando GORM, PostgreSQL
 - [Go 1.24.2](https://go.dev/)
 - [PostgreSQL 16](https://www.postgresql.org/)
 - [GORM](https://gorm.io/)
-- [Chi](https://github.com/go-chi/chi)
+- [Gin](https://gin-gonic.com/)
 - Docker + Docker Compose
 - `jq` (para formatação de JSON no terminal)
 
@@ -23,26 +23,15 @@ Antes de começar, você precisa ter instalado:
 - [Go 1.24.2](https://go.dev/dl/)
 - [Docker](https://www.docker.com/)
 - [Docker Compose](https://docs.docker.com/compose/)
-- [jq](https://stedolan.github.io/jq/) (opcional, mas útil para testes com JSON)
-
-### Instalar `jq`:
-
-```bash
-# Ubuntu/Debian
-sudo apt install jq
-
-# MacOS com Homebrew
-brew install jq
-```
 
 ---
 
-## 🚀 Como rodar a aplicação
+## 🚀 Rodando a aplicação
 
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/finance-manager-go.git
+git clone https://github.com/ropehapi/finance-manager-go.git
 cd finance-manager-go
 ```
 
@@ -99,64 +88,14 @@ make create-account # Cria uma conta de exemplo
 
 ---
 
-## 🔍 Testando endpoints com curl
-
-### Health check
-
-```bash
-curl http://localhost:8080/health
-```
-
-### Criar uma conta
-
-```bash
-curl -X POST http://localhost:8080/accounts   -H "Content-Type: application/json"   -d '{
-    "kind": "personal",
-    "currencyCode": "BRL",
-    "name": "Conta Corrente",
-    "balance": 100000
-  }' | jq
-```
-
-### Listar contas
-
-```bash
-curl http://localhost:8080/accounts | jq
-```
-
-### Buscar conta por ID
-
-```bash
-curl http://localhost:8080/accounts/<id> | jq
-```
-
-### Atualizar conta
-
-```bash
-curl -X PUT http://localhost:8080/accounts/<id>   -H "Content-Type: application/json"   -d '{
-    "kind": "personal",
-    "currencyCode": "USD",
-    "name": "Conta Atualizada",
-    "balance": 150000
-  }' | jq
-```
-
-### Deletar conta
-
-```bash
-curl -X DELETE http://localhost:8080/accounts/<id>
-```
-
----
-
-## 📬 Testes com Postman
+## 📬 Usando a aplicação com um HTTP Client
 
 ### 📁 Importar coleção
 
 1. Abra o Postman
 2. Clique em **Import**
 3. Selecione o arquivo `finance-manager-go.postman_collection.json`
-4. Teste todos os endpoints de forma visual
+4. Teste todos os endpoints de forma interativa
 
 ---
 
@@ -168,9 +107,3 @@ curl -X DELETE http://localhost:8080/accounts/<id>
   - **Senha**: `postgres`
   - **Banco**: `accountdb`
 - Os dados do banco são persistidos no volume `pgdata`
-
----
-
-## 📞 Suporte
-
-Se algo der errado ou quiser sugerir melhorias, abra uma issue ou me chama! 🚀
