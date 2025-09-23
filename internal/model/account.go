@@ -27,8 +27,8 @@ type AccountFilter struct {
 
 type CreateAccountInputDTO struct {
 	CurrencyCode string `json:"currencyCode"`
-	Balance      int    `json:"balance" binding:"required"`
-	Name         string `json:"name" binding:"required,max=36"`
+	Balance      int    `json:"balance"`
+	Name         string `json:"name"`
 }
 
 type CreateAccountOutputDTO struct {
