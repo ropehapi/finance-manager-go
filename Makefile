@@ -7,13 +7,10 @@ API_PORT=8080
 build:
 	docker compose build
 
-# Sobe os containers em modo interativo
-up:
-	docker compose up
-
-# Sobe os containers em modo detached
-up-detach:
+# Sobe a aplicação
+run :
 	docker compose up -d
+
 
 # Para os containers
 down:
